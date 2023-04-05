@@ -1,0 +1,92 @@
+start -> document
+
+document -> (doctype)? html 
+
+html -> head | body
+
+head -> (meta | title | script | style | link | block | include | mixin | comment)*
+
+body -> (tag | text | code | each | while | if | case | mixin | include | comment)*
+
+tag -> tagStart tagEnd | tagStart attributes tagEnd | tagStart content tagEnd | tagStart attributes content tagEnd
+
+tagStart -> tagIndent tagID tagClass? tagAttrs? tagName
+
+tagIndent -> INDENT | empty
+
+tagID -> ID? | empty
+
+tagClass -> CLASS* | empty
+
+tagAttrs -> tagAttr* | empty
+
+tagAttr -> "(" attributeList ")"
+
+attributeList -> attribute | attribute "," attributeList
+
+attribute -> attributeIdentifier "=" attributeValue
+
+attributeIdentifier -> identifier
+
+attributeValue -> stringLiteral | identifier
+
+tagName -> identifier
+
+tagEnd -> TAG_END | empty
+
+content -> tagContent | code
+
+tagContent -> (text | interpolation | tag)*
+
+text -> textNode
+
+textNode -> TEXT
+
+interpolation -> "#{" code "}"
+
+code -> codeLine | codeLine code
+
+codeLine -> "." text | codeBlock
+
+codeBlock -> script | each | while | if | case | mixin | include
+
+each -> "each" identifier "in" expression content "endeach"
+
+while -> "while" expression content "endwhile"
+
+if -> ifBlock | elseIfBlock | elseBlock
+
+ifBlock -> "if" expression content ("else" "if" expression content)* ("else" content)? "endif"
+
+elseIfBlock -> "else" "if" expression content ("else" content)? "endif"
+
+elseBlock -> "else" content "endif"
+
+case -> "case" expression ("when" expression)* ("else" content)? "endcase"
+
+mixin -> "mixin" identifier parameters? content
+
+parameters -> "(" (parameter ("," parameter)*)? ")"
+
+parameter -> identifier
+
+include -> "include" (stringLiteral | identifier) attributes?
+
+comment -> COMMENT
+
+meta -> "meta" attributes
+
+title -> "title" tagContent "title"
+
+script -> "script" attributes? (scriptContent | empty) TAG_END
+
+scriptContent -> codeBlock | scriptText
+
+scriptText -> SCRIPT_TEXT
+
+style -> "style" attributes? tagContent "style"
+
+link -> "link" attributes
+
+block -> "block" identifier content
+
