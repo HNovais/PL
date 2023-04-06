@@ -1,6 +1,6 @@
 start -> document
 
-document -> (doctype)? html 
+document -> doctype (html | xml | transitional | strict | frameset | 1.1 | basic | mobile | plist) 
 
 html -> head | body
 
