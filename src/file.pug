@@ -1,3 +1,4 @@
+doctype html
 html(lang="en")
     head
         title= pageTitle
@@ -5,6 +6,11 @@ html(lang="en")
             if (foo) bar(1 + 5)
     body
         h1 Pug - node template engine
+        script.
+            if (usingPug)
+                console.log('you are awesome')
+            else
+                console.log('use pug')
         #container.col
             if youAreUsingPug
                 p You are amazing
@@ -12,5 +18,5 @@ html(lang="en")
                 p Get on it!
             p.
                 Pug is a terse and simple templating language with a
-                strong focus on performance and powerful features
+                strong focus on performance and powerful features     
         h1 Another One

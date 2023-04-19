@@ -1,8 +1,8 @@
-import re
 import ply.lex as lex
 import sys
 
 tokens = [
+    'DOCTYPE',
     'HTML_START',
     'LANG_EQ',
     'TAG_VALUE',
@@ -10,7 +10,6 @@ tokens = [
     'TITLE',
     'EQUAL',
     'PAGE_TITLE',
-    'SCRIPT',
     'TYPE_EQ',
     'JS_TYPE',
     'SCRIPT_CONTENT',
@@ -20,6 +19,7 @@ tokens = [
     'BODY',
     'H1',
     'DIV',
+    'DIV_ABR',
     'DIV_ID',
     'DIV_CLASS',
     'IF_STATEMENT',
@@ -31,9 +31,16 @@ tokens = [
     'R_BRACE',
     'H1_TEXT',
     'P_TEXT',
-    'P_DOT_TEXT'
+    'P_DOT_TEXT',
+    'TITLE_TEXT',
+    'UL',
+    'LI_TEXT',
+    'SCRIPT',
+    'LONG_SCRIPT',
+    'INDENT'
 ]
 
+t_DOCTYPE = r'doctype\s[a-zA-Z]*'
 t_HTML_START = r'html'
 t_LANG_EQ = r'lang='
 t_TAG_VALUE = r'[\'"]([\w/-]+)[\'"]'
@@ -47,13 +54,16 @@ t_IF = r'if'
 t_ELSE = r'else'
 t_BODY = r'body'
 t_H1 = r'h1'
-t_DIV = r'\#'
+t_DIV_ABR = r'\#'
+t_DIV = r'div'
 t_IF_STATEMENT = r'if .+'
 t_ELSE_STATEMENT = r'else'
 t_PARAGRAPH = r'p'
 t_PERIOD = r'\.'
 t_L_BRACE = r'\('
 t_R_BRACE = r'\)'
+t_UL = r'ul'
+t_INDENT = r'\s{4}'     
 
 def t_DIV_ID(t):
     r'\#[a-zA-Z][a-zA-Z0-9_-]*'
@@ -64,6 +74,13 @@ def t_DIV_CLASS(t):
     r'\.[a-zA-Z][a-zA-Z0-9_-]*'
     t.value = t.value[1:]
     return t
+
+def t_TITLE_TEXT(t):
+    r'title\s+.*'
+    words = t.value.split(' ')
+    text = ' '.join(words[1:])
+    t.value = text.strip()
+    return t 
 
 def t_H1_TEXT(t):
     r'h1\s+.*'
@@ -79,6 +96,28 @@ def t_P_TEXT(t):
     t.value = text.strip()
     return t
 
+def t_LI_TEXT(t):
+    r'li\s+.*'
+    words = t.value.split(' ')
+    text = ' '.join(words[1:])
+    t.value = text.strip()
+    return t
+
+def t_LONG_SCRIPT(t):
+    r'script\.[\n\s]+(.+\n)+'
+    lines = t.value.split('\n')
+    script_lines = []
+    indent_level = None
+    for line in lines:
+        if indent_level is None:
+            if len(line) - len(line.lstrip()) != 0:
+                indent_level = len(line) - len(line.lstrip()) - 4
+        elif len(line) - len(line.lstrip()) <= indent_level:
+            break
+        script_lines.append(line)
+    t.value = ' '.join(script_lines)
+    return t
+   
 def t_P_DOT_TEXT(t):
     r'p\.\n([\t ]+.+\n)+'
     lines = t.value.split('\n')[1:-1]
@@ -91,18 +130,12 @@ def t_PAGE_TITLE(t):
     t.value = t.value.split('=')[1].strip()
     return t
 
-def t_SCRIPT_CONTENT(t):
-    r'script\(type=\'text\/javascript\'\)\..+'
-    t.value = t.value.split('script(type=\'text/javascript\').')[1].strip()
-    return t
-
 def t_CONDITION(t):
     r'if .+'
     t.value = t.value.split('if ')[1].strip()
     return t
 
-
-t_ignore = ' \t\n'
+t_ignore = '\n'
 
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
@@ -119,4 +152,3 @@ with open(sys.argv[1], 'r') as file:
         if not tok:
             break
         print(tok)
-
