@@ -4,18 +4,27 @@ tokens = (
     'TITLE',
     'TITLE_VALUE',
     'COMMENT',
-    'BASIC_STRING',
+    'BASIC_STRING', # STRINGS
     'MLBASIC_STRING',
     'LITERAL_STRING',
     'MLLITERAL_STRING',
-    'BARE_KEY',
+    'INT', # INTEGERS
+    'HEX',
+    'OCT',
+    'BIN',
+    'FLOAT', # FLOATS
+    'ODT', # DATES
+    'LDT', 
+    'LOCAL_DATE',
+    'LOCAL_TIME',
+    'BARE_KEY', # KEYS
     'QUOTED_KEY',
     'DOTTED_KEY',
     'TEXT',
-    'EQUAL',
+    'EQUAL', # SYMBOLS
     'QUOTE',
     'CARDINAL',
-    'BOOLEAN'
+    'BOOLEAN' # BOOLEANS
 )
 
 t_TITLE = r'title'
@@ -49,6 +58,22 @@ def t_QUOTED_KEY(t): # TA A APANHAR DEMASIADO first = "Tom" last = "Preston-Wern
         t.value = t.value.strip(' "=')
     return t
 
+def t_ODT(t):
+    r'\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}(?::\d{2})?)'
+    return t
+
+def t_LDT(t):
+    r'\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?'
+    return t
+
+def t_LOCAL_DATE(t):
+    r'\d{4}-\d{2}-\d{2}'
+    return t
+
+def t_LOCAL_TIME(t):
+    r'\d{2}:\d{2}:\d{2}(\.\d+)?'
+    return t
+
 def t_MLLITERAL_STRING(t):
     r'\'\'\'(\n|.)*?\'\'\''
     t.value = t.value[3:-3].replace('\n', ' ') # ESPAÇOS EXTRA NÃO ESTÃO A SER IGNORADOS
@@ -67,6 +92,31 @@ def t_MLBASIC_STRING(t):
 def t_BASIC_STRING(t):
     r'\"([^\\\n]|(\\.))*?\"'
     t.value = t.value[1:-1]
+    return t
+
+def t_HEX(t):
+    r'0[xX][\da-fA-F]+'
+    t.value = int(t.value, 16)
+    return t
+
+def t_OCT(t):
+    r'0[oO][0-7]+'
+    t.value = int(t.value, 8)
+    return t
+
+def t_BIN(t):
+    r'0[bB][01]+'
+    t.value = int(t.value, 2)
+    return t
+
+def t_FLOAT(t):
+    r'[+-]?\d+\.\d*([eE][+-]?\d+)?|[+-]?\d+[eE][+-]?\d+'
+    t.value = float(t.value)
+    return t
+
+def t_INT(t):
+    r'[+-]*\d+(?:_\d+)*'
+    t.value = t.value.replace('_', '')  
     return t
 
 def t_BARE_KEY(t):
