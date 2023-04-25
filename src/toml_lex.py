@@ -17,6 +17,9 @@ tokens = (
     'LDT', 
     'LOCAL_DATE',
     'LOCAL_TIME',
+    'ARRAY_START', # ARRAYS
+    'ARRAY_END',
+    'COMMA',
     'BARE_KEY', # KEYS
     'QUOTED_KEY',
     'DOTTED_KEY',
@@ -24,6 +27,7 @@ tokens = (
     'EQUAL', # SYMBOLS
     'QUOTE',
     'CARDINAL',
+    'NEWLINE',
     'BOOLEAN' # BOOLEANS
 )
 
@@ -33,6 +37,10 @@ t_QUOTE = r'\"'
 t_CARDINAL = r'\#'
 t_TEXT = r'[a-zA-Z]+'
 t_BOOLEAN = r'true|false'
+t_ARRAY_START = r'\['
+t_ARRAY_END = r'\]'
+t_COMMA = r','
+t_NEWLINE = r'\n+'
 
 def t_TITLE_VALUE(t):
     r'title\s\=\s\"[a-zA-Z\s]+\"'
@@ -143,7 +151,7 @@ def t_DOTTED_KEY(t):
     return t
 
 
-t_ignore = ' \t\n'
+t_ignore = ' \t'
 
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
