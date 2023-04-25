@@ -1,8 +1,13 @@
 import ply.lex as lex
 
+states = (
+    ('value', 'exclusive'),
+)
+
 tokens = (
     'TITLE',
     'TITLE_VALUE',
+    'TABLE',
     'COMMENT',
     'BASIC_STRING', # STRINGS
     'MLBASIC_STRING',
@@ -27,7 +32,6 @@ tokens = (
     'EQUAL', # SYMBOLS
     'QUOTE',
     'CARDINAL',
-    'NEWLINE',
     'BOOLEAN' # BOOLEANS
 )
 
@@ -36,11 +40,23 @@ t_EQUAL = r'\='
 t_QUOTE = r'\"'
 t_CARDINAL = r'\#'
 t_TEXT = r'[a-zA-Z]+'
-t_BOOLEAN = r'true|false'
-t_ARRAY_START = r'\['
 t_ARRAY_END = r'\]'
-t_COMMA = r','
-t_NEWLINE = r'\n+'
+    
+t_TABLE = r'\[(.*)\]'
+
+def t_COMMA(t):
+    r','
+    t.lexer.begin('value')
+    return t
+
+def t_value_BOOLEAN(t):
+    r'true|false'
+    t.lexer.begin('INITIAL')
+    return t
+
+def t_value_ARRAY_START(t):
+    r'\['
+    return t
 
 def t_TITLE_VALUE(t):
     r'title\s\=\s\"[a-zA-Z\s]+\"'
@@ -64,72 +80,87 @@ def t_QUOTED_KEY(t): # TA A APANHAR DEMASIADO first = "Tom" last = "Preston-Wern
         t.value = t.value.strip(' \'=')
     else:
         t.value = t.value.strip(' "=')
+    t.lexer.begin('value')
     return t
 
-def t_ODT(t):
+def t_value_ODT(t):
     r'\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}(?::\d{2})?)'
+    t.lexer.begin('INITIAL')
     return t
 
-def t_LDT(t):
+def t_value_LDT(t):
     r'\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?'
+    t.lexer.begin('INITIAL')
     return t
 
-def t_LOCAL_DATE(t):
+def t_value_LOCAL_DATE(t):
     r'\d{4}-\d{2}-\d{2}'
+    t.lexer.begin('INITIAL')
     return t
 
-def t_LOCAL_TIME(t):
+def t_value_LOCAL_TIME(t):
     r'\d{2}:\d{2}:\d{2}(\.\d+)?'
+    t.lexer.begin('INITIAL')
     return t
 
-def t_MLLITERAL_STRING(t):
+def t_value_MLLITERAL_STRING(t):
     r'\'\'\'(\n|.)*?\'\'\''
     t.value = t.value[3:-3].replace('\n', ' ') # ESPAÇOS EXTRA NÃO ESTÃO A SER IGNORADOS
+    t.lexer.begin('INITIAL')
     return t
 
-def t_LITERAL_STRING(t):
+def t_value_LITERAL_STRING(t):
     r'\'(.*)\''
     t.value = t.value[1:-1]
+    t.lexer.begin('INITIAL')
     return t
 
-def t_MLBASIC_STRING(t):
+def t_value_MLBASIC_STRING(t):
     r'"""(\n|.)*?"""'
     t.value = t.value[3:-3].replace("\\", "").replace("\n", " ") # ESPAÇOS EXTRA NÃO ESTÃO A SER IGNORADOS e VER PROBLEMA COM AS BARRAS
+    t.lexer.begin('INITIAL')
     return t
 
-def t_BASIC_STRING(t):
+def t_value_BASIC_STRING(t):
     r'\"([^\\\n]|(\\.))*?\"'
     t.value = t.value[1:-1]
+    t.lexer.begin('INITIAL')
     return t
 
-def t_HEX(t):
+def t_value_HEX(t):
     r'0[xX][\da-fA-F]+'
     t.value = int(t.value, 16)
+    t.lexer.begin('INITIAL')
     return t
 
-def t_OCT(t):
+def t_value_OCT(t):
     r'0[oO][0-7]+'
     t.value = int(t.value, 8)
+    t.lexer.begin('INITIAL')
     return t
 
-def t_BIN(t):
+def t_value_BIN(t):
     r'0[bB][01]+'
     t.value = int(t.value, 2)
+    t.lexer.begin('INITIAL')
     return t
 
-def t_FLOAT(t):
+def t_value_FLOAT(t):
     r'[+-]?\d+\.\d*([eE][+-]?\d+)?|[+-]?\d+[eE][+-]?\d+'
     t.value = float(t.value)
+    t.lexer.begin('INITIAL')
     return t
 
-def t_INT(t):
+def t_value_INT(t):
     r'[+-]*\d+(?:_\d+)*'
     t.value = t.value.replace('_', '')  
+    t.lexer.begin('INITIAL')
     return t
 
 def t_BARE_KEY(t):
     r'[A-Za-z0-9_-]+\s*='
     t.value = t.value.strip('=').strip()
+    t.lexer.begin('value')
     return t
 
 def t_DOTTED_KEY(t):
@@ -148,12 +179,13 @@ def t_DOTTED_KEY(t):
                 in_quotes = not in_quotes
     keys.append(current_key.strip(' \''))
     t.value = keys
+    t.lexer.begin('value')
     return t
 
 
-t_ignore = ' \t'
+t_ANY_ignore = ' \t\n'
 
-def t_error(t):
+def t_ANY_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 

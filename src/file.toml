@@ -4,4 +4,12 @@ integers = [
     3
 ]
 
+int = 2
+
+
 [newtable]
+
+name = "Orange"
+physical.color = "orange"
+physical.shape = "round"
+site."google.com" = true
