@@ -1,15 +1,27 @@
-integers = [
-    1,
-    2,
-    3
-]
+integers = [ 
+    1, 
+    2, 
+    3 
+] # comment
 
-int = 2
+ola = ''' fWJIFEIFEFERIGRE
+EJFIOERJEOIW~~
+fwefifjfiof
+dwewemfif
+dwkfowef
+'''
 
+key = { efieui }
 
-[newtable]
-
-name = "Orange"
-physical.color = "orange"
 physical.shape = "round"
 site."google.com" = true
+
+name = { first = "Tom", last = "Preston-Werner" }
+
+= "no key name"
+
+[ key ]
+physical.shape = "round"
+site."google.com" = true
+
+physical.shape = "round"
