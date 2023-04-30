@@ -1,27 +1,23 @@
-integers = [ 
-    1, 
-    2, 
-    3 
-] # comment
+# This is a TOML document
 
-ola = ''' fWJIFEIFEFERIGRE
-EJFIOERJEOIW~~
-fwefifjfiof
-dwewemfif
-dwkfowef
-'''
+title = "TOML Example"
 
-key = { efieui }
+[owner]
+name = "Tom Preston-Werner"
+dob = 1979-05-27T07:32:00-08:00
 
-physical.shape = "round"
-site."google.com" = true
+[database]
+enabled = true
+ports = [ 8000, 8001, 8002 ]
+data = [ ["delta", "phi"], [3.14] ]
+temp_targets = { cpu = 79.5, case = 72.0 }
 
-name = { first = "Tom", last = "Preston-Werner" }
+[servers]
 
-= "no key name"
+[servers.alpha]
+ip = "10.0.0.1"
+role = "frontend"
 
-[ key ]
-physical.shape = "round"
-site."google.com" = true
-
-physical.shape = "round"
+[servers.beta]
+ip = "10.0.0.2"
+role = "backend"
