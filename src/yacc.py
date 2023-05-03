@@ -2,27 +2,32 @@ import json
 import ply.yacc as yacc
 from lexer import tokens
 
+def p_start(p):
+    '''start : table
+             | pairs'''
+    p[0] = p[1]
+
+def p_table(p):
+    'table : L_SQUARE_BRACKET key R_SQUARE_BRACKET'
+    p[0] = p[2]
+
 def p_pairs(p):
     ''' pairs : pairs pair 
               | pair '''
     if len(p) == 2:
-        p[0] = dict([p[1]])
+        p[0] = p[1]
     else:
-        if len(p[2]) == 2:
-            p[0] = dict([p[1], p[2]])
-        else:
-            print("Error: invalid pair")
+        p[0] = p[1]
+        p[0].update(p[2])
 
 def p_pair(p):
     'pair : key EQUAL value'
     p[0] = (p[1], p[3])
-    print("Pair:", p[0])
 
 def p_key(p):
     ''' key : TEXT
             | QUOTED_STRING '''
     p[0] = p[1]
-    print("Key:", p[0])
 
 def p_value(p):
     ''' value : QUOTED_STRING
@@ -35,9 +40,22 @@ def p_value(p):
               | O_DATE_TIME
               | L_DATE_TIME
               | LOCAL_DATE
-              | LOCAL_TIME '''
+              | LOCAL_TIME 
+              | array'''
     p[0] = p[1]
-    print("Value:", p[0])
+
+def p_array(p):
+    'array : L_SQUARE_BRACKET expression R_SQUARE_BRACKET'
+    p[0] = p[2]
+
+def p_expression(p):
+    ''' expression : value COMMA expression
+                   | value '''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = p[1]
+        p[0].update(p[2])
 
 def p_error(p):
     if p:
@@ -52,20 +70,7 @@ parser = yacc.yacc()
 with open("file.toml") as f:
     content = f.read()
 
-result = {}
-for pair in parser.parse(content):
-    key, value = pair
-    if isinstance(value, str):
-        if value.startswith('"') or value.startswith("'"):
-            # Handle quoted strings
-            value = value[1:-1]
-        elif value.lower() in ['true', 'false']:
-            # Handle boolean values
-            value = value.lower() == 'true'
-        else:
-            # Handle other strings (e.g., dates)
-            value = str(value)
-    result[key] = value
+result = parser.parse(content, debug=True)
 
 # Write the output file in JSON format
 with open("output.json", "w") as f:
