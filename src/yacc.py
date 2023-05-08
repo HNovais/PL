@@ -10,8 +10,12 @@ def p_start(p):
     p[0] = p[1]
 
 def p_table(p):
-    'table : L_SQUARE_BRACKET key R_SQUARE_BRACKET pairs'
-    p[0] = {p[2]: p[4]}
+    '''table : L_SQUARE_BRACKET key R_SQUARE_BRACKET NEWLINE pairs
+             | NEWLINE L_SQUARE_BRACKET key R_SQUARE_BRACKET NEWLINE pairs'''
+    if len(p) == 6:
+        p[0] = {p[2]: p[5]}
+    else:
+        p[0] = {p[3]: p[6]}
 
 def p_pairs(p):
     ''' pairs : pair 
@@ -22,22 +26,29 @@ def p_pairs(p):
         p[0] = p[1] + [p[2]]
 
 def p_pair(p):
-    '''pair : key EQUAL value'''
+    '''pair : key EQUAL value 
+            | key EQUAL value NEWLINE'''
     p[0] = {p[1]: p[3]}
 
 def p_key(p):
     ''' key : bare_key
+            | quoted_key
             | dotted_key'''
     p[0] = p[1]
 
 def p_bare_key(p):
     ''' bare_key : TEXT
-                 | QUOTED_STRING'''
+                 | INT'''
+    p[0] = p[1]
+
+def p_quoted_key(p):
+    ''' quoted_key : QUOTED_STRING
+                   | PLICA_STRING'''
     p[0] = p[1]
 
 def p_dotted_key(p):
     'dotted_key : key DOT key'
-    p[0] = p[1]
+    print(p[1], p[3])
 
 def p_value(p):
     ''' value : QUOTED_STRING
@@ -75,10 +86,10 @@ def p_error(p):
 
 parser = yacc.yacc()
 
-with open("file.toml") as f:
+with open("file.toml", encoding="utf-8") as f:
     content = f.read()
 
 result = parser.parse(content)
 
 with open("output.json", "w") as f:
-    f.write(json.dumps(result, indent=2))  
+    f.write(json.dumps(result, indent=2)) 

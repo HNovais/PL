@@ -23,10 +23,11 @@ tokens = (
     'R_SQUARE_BRACKET',
     'L_CURVE_BRACKET',
     'R_CURVE_BRACKET',
+    'NEWLINE'
 )
 
 t_TEXT = r'[a-zA-Z_\-]+'
-#t_NEWLINE = r'\n+'
+t_NEWLINE = r'\n+'
 t_L_BRACKET = r'\('
 t_R_BRACKET = r'\)'
 t_L_SQUARE_BRACKET = r'\['
@@ -78,6 +79,7 @@ def t_QUOTED_STRING(t):
 
 def t_PLICA_STRING(t):
     r'\'(.*)\''
+    t.value = t.value[1:-1]
     return t
 
 def t_ML_QUOTED_STRING(t):
@@ -88,7 +90,7 @@ def t_ML_PLICA_STRING(t):
     r'\'{3}(\n|.)*?\'{3}'
     return t
 
-t_ignore = ' \t\n'
+t_ignore = ' \t'
 
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
