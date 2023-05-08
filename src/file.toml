@@ -2,5 +2,7 @@
 
 [table]
 
-key = "value"  # This is a comment at the end of a line
-another = "# This is not a comment"
+name = "Orange"
+physical.color = "orange"
+physical.shape = "round"
+site."google.com" = true

@@ -2,6 +2,8 @@ import json
 import ply.yacc as yacc
 from lexer import tokens
 
+is_nested_key = False
+
 def p_start(p):
     '''start : pairs
              | table'''
@@ -20,12 +22,21 @@ def p_pairs(p):
         p[0] = p[1] + [p[2]]
 
 def p_pair(p):
-    'pair : key EQUAL value'
+    '''pair : key EQUAL value'''
     p[0] = {p[1]: p[3]}
 
 def p_key(p):
-    ''' key : TEXT
-            | QUOTED_STRING '''
+    ''' key : bare_key
+            | dotted_key'''
+    p[0] = p[1]
+
+def p_bare_key(p):
+    ''' bare_key : TEXT
+                 | QUOTED_STRING'''
+    p[0] = p[1]
+
+def p_dotted_key(p):
+    'dotted_key : key DOT key'
     p[0] = p[1]
 
 def p_value(p):
@@ -70,4 +81,4 @@ with open("file.toml") as f:
 result = parser.parse(content)
 
 with open("output.json", "w") as f:
-    f.write(json.dumps(result, indent=2))
+    f.write(json.dumps(result, indent=2))  

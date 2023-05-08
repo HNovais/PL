@@ -25,8 +25,6 @@ tokens = (
     'R_CURVE_BRACKET',
 )
 
-
-t_BOOLEAN = r'true|false'
 t_TEXT = r'[a-zA-Z_\-]+'
 #t_NEWLINE = r'\n+'
 t_L_BRACKET = r'\('
@@ -38,6 +36,10 @@ t_R_CURVE_BRACKET = r'\}'
 t_EQUAL = '='
 t_COMMA = r','
 t_DOT = r'.'
+
+def t_BOOLEAN(t):
+    r'true|false'
+    return t
 
 def t_COMMENT(t):
     r'\#.*'
@@ -71,6 +73,7 @@ def t_INT(t):
 
 def t_QUOTED_STRING(t):
     r'\"([^\\\n]|(\\.))*?\"'
+    t.value = t.value[1:-1]
     return t
 
 def t_PLICA_STRING(t):
