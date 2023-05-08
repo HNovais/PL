@@ -3,26 +3,25 @@ import ply.yacc as yacc
 from lexer import tokens
 
 def p_start(p):
-    '''start : table
-             | pairs'''
+    '''start : pairs
+             | table'''
     p[0] = p[1]
 
 def p_table(p):
-    'table : L_SQUARE_BRACKET key R_SQUARE_BRACKET'
-    p[0] = p[2]
+    'table : L_SQUARE_BRACKET key R_SQUARE_BRACKET pairs'
+    p[0] = {p[2]: p[4]}
 
 def p_pairs(p):
-    ''' pairs : pairs pair 
-              | pair '''
+    ''' pairs : pair 
+              | pairs pair '''
     if len(p) == 2:
-        p[0] = p[1]
+        p[0] = [p[1]]
     else:
-        p[0] = p[1]
-        p[0].update(p[2])
+        p[0] = p[1] + [p[2]]
 
 def p_pair(p):
     'pair : key EQUAL value'
-    p[0] = (p[1], p[3])
+    p[0] = {p[1]: p[3]}
 
 def p_key(p):
     ''' key : TEXT
@@ -49,20 +48,18 @@ def p_array(p):
     p[0] = p[2]
 
 def p_expression(p):
-    ''' expression : value COMMA expression
+    ''' expression : expression COMMA value
                    | value '''
     if len(p) == 2:
-        p[0] = p[1]
+        p[0] = [p[1]]
     else:
-        p[0] = p[1]
-        p[0].update(p[2])
-
+        p[0] = p[1] + [p[3]]
+    
 def p_error(p):
     if p:
         print(f"Syntax error at line {p.lineno}, column {p.lexpos}: unexpected token {p.value}")
     else:
         print("Syntax error: unexpected end of input")
-    # Return None to indicate that parsing failed
     return None
 
 parser = yacc.yacc()
@@ -70,8 +67,7 @@ parser = yacc.yacc()
 with open("file.toml") as f:
     content = f.read()
 
-result = parser.parse(content, debug=True)
+result = parser.parse(content)
 
-# Write the output file in JSON format
 with open("output.json", "w") as f:
     f.write(json.dumps(result, indent=2))
