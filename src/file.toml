@@ -2,7 +2,9 @@
 
 [table]
 
-name = "Orange"
-physical.color = "orange"
-physical.shape = "round"
-site."google.com" = true
+name = "toml"
+yey = 12
+
+[yws]
+a = "x"
+b = "y"
