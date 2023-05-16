@@ -1,5 +1,7 @@
 # This is a full-line comment
 
+title = "fdsfa" 
+
 [table]
 
 name = "toml"
@@ -8,3 +10,4 @@ yey = 12
 [yws]
 a = "x"
 b = "y"
+a = "z"

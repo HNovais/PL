@@ -1,6 +1,7 @@
 import ply.lex as lex
 
 tokens = (
+    'TITLE',
     'TEXT',
     'QUOTED_STRING',
     'PLICA_STRING',
@@ -37,6 +38,11 @@ t_R_CURVE_BRACKET = r'\}'
 t_EQUAL = '='
 t_COMMA = r','
 t_DOT = r'.'
+
+def t_TITLE(t):
+    r'title\s*=\s*"(.*)"'
+    t.value = t.value.split('\"')[1]
+    return t
 
 def t_BOOLEAN(t):
     r'true|false'
@@ -106,4 +112,4 @@ with open('file.toml', 'r', encoding="utf-8") as file:
         tok = lexer.token()
         if not tok:
             break
-        print(tok)
+        # print(tok)

@@ -6,9 +6,14 @@ tables = []
 currentTable = None
 
 def p_start(p):
-    '''start : pairs
-             | tables'''
-    p[0] = p[1]
+    '''start : tables
+             | TITLE NEWLINE tables'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        dict = {"title" : p[1]}
+        dict.update(p[3])
+        p[0] = dict
 
 def p_tables(p):
     ''' tables : table
@@ -30,42 +35,48 @@ def p_table(p):
     else:
         key = p[3]
         pairs = p[6]
-    
-    table_dict = {key: pairs}
+
+    pairsDict = {}
+    for pair in pairs:
+        if pair[0] in pairsDict.keys():
+            print(pair[0] + " already defined in table " + key)
+            pass
+        else:
+            pairsDict[pair[0]] = pair[1]
+
+    table_dict = {key: pairsDict}
     tables.append(table_dict)
     p[0] = table_dict
+
     
 def p_pairs(p):
     ''' pairs : pair
-              | pairs pair'''
+              | pair pairs'''
     if len(p) == 2:
-        p[0] = p[1]
+        p[0] = [p[1]]
     else:
-        p[1].update(p[2])
-        p[0] = p[1]
+        p[0] = [p[1]] + p[2]
 
 def p_pair(p):
     '''pair : key EQUAL value 
             | key EQUAL value NEWLINE'''
-    p[0] = {p[1]: p[3]}
+    p[0] = (p[1], p[3])
 
 def p_key(p):
     ''' key : bare_key
-            | dotted_key'''
+            | quoted_key'''
     p[0] = p[1]
 
 def p_bare_key(p):
     ''' bare_key : TEXT
-                 | INT
-                 | QUOTED_STRING
-                 | PLICA_STRING'''
+                 | INT '''
     p[0] = p[1]
 
-def p_dotted_key(p):
-    ''' dotted_key : bare_key DOT key '''
-    p[1] = {p[3] : None}
+def p_quoted_key(p):
+    ''' quoted_key : QUOTED_STRING
+                   | PLICA_STRING'''
     p[0] = p[1]
-
+    
 def p_value(p):
     ''' value : QUOTED_STRING
               | PLICA_STRING
