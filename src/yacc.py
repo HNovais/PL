@@ -49,9 +49,11 @@ def p_table(p):
                     if nested_key not in nested_dict:
                         nested_dict[nested_key] = {}
                     nested_dict = nested_dict[nested_key]
-                nested_dict[keys[-1]] = pair[1]
-                pairsDict[keys[0]] = nested_dict 
-
+                if keys[-1] in nested_dict.keys():
+                    print(keys[-1] + " already defined in table " + key)
+                else:
+                    nested_dict[keys[-1]] = pair[1]
+                    pairsDict[keys[0]] = nested_dict 
             else:
                 pairsDict[pair[0]] = pair[1]
 
@@ -151,7 +153,6 @@ def split_dot(key):
             value[index] += char
 
     return value
-
 
 parser = yacc.yacc()
 
