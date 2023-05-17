@@ -10,4 +10,4 @@ yey = 12
 [yws]
 coord.a = "x"
 coord.b = "y"
-coord.a = "z"
+coord.something.x = "z"

@@ -53,7 +53,6 @@ def p_table(p):
                     print(keys[-1] + " already defined in table " + key)
                 else:
                     nested_dict[keys[-1]] = pair[1]
-                    pairsDict[keys[0]] = nested_dict 
             else:
                 pairsDict[pair[0]] = pair[1]
 
