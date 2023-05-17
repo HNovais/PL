@@ -8,6 +8,6 @@ name = "toml"
 yey = 12
 
 [yws]
-a = "x"
-b = "y"
-a = "z"
+coord.a = "x"
+coord.b = "y"
+coord.c = "z"

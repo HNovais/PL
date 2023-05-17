@@ -42,7 +42,18 @@ def p_table(p):
             print(pair[0] + " already defined in table " + key)
             pass
         else:
-            pairsDict[pair[0]] = pair[1]
+            if is_dotted_key(pair[0]):
+                keys = split_dot(pair[0])
+                nested_dict = pairsDict
+                for nested_key in keys[:-1]:
+                    if nested_key not in nested_dict:
+                        nested_dict[nested_key] = {}
+                    nested_dict = nested_dict[nested_key]
+                nested_dict[keys[-1]] = pair[1]
+                pairsDict[keys[0]] = nested_dict 
+
+            else:
+                pairsDict[pair[0]] = pair[1]
 
     table_dict = {key: pairsDict}
     tables.append(table_dict)
@@ -64,8 +75,12 @@ def p_pair(p):
 
 def p_key(p):
     ''' key : bare_key
-            | quoted_key'''
-    p[0] = p[1]
+            | quoted_key
+            | key DOT key'''
+    if len(p) == 4:
+        p[0] = p[1] + '.' + p[3]
+    else:
+        p[0] = p[1]
 
 def p_bare_key(p):
     ''' bare_key : TEXT
@@ -110,6 +125,33 @@ def p_error(p):
     else:
         print("Syntax error: unexpected end of input")
     return None
+
+def is_dotted_key(key):
+    quotes = False
+
+    for char in key:
+        if char == '"':
+            quotes = not quotes
+        elif char == "." and not quotes:
+            return True
+    return False
+
+def split_dot(key):
+    quotes = False
+    value = ['']
+    index = 0
+
+    for char in key:
+        if char == '"':
+            quotes = not quotes
+        elif char == '.' and not quotes:
+            value.append('')
+            index += 1
+        else:
+            value[index] += char
+
+    return value
+
 
 parser = yacc.yacc()
 
