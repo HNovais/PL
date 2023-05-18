@@ -2,8 +2,8 @@ import json
 import ply.yacc as yacc
 from lexer import tokens
 
-tables = []
-tables1 = {}
+
+tables = {}
 currentTable = None
 tablesTitles = []
 
@@ -19,14 +19,12 @@ def p_start(p):
 
 def p_tables(p):
     ''' tables : table
-               | tables table'''
-
+               | tables table
+               | arrayTable
+               | tables arrayTable'''
 
     if len(p) == 2:
         p[0] = p[1]
-    # elif len(p) ==
-    #     key = p[2]
-    #     pairs = {} 
     else:
         p[0] = {}
         p[0].update(p[1])
@@ -38,6 +36,7 @@ def p_table(p):
     '''table : L_SQUARE_BRACKET key R_SQUARE_BRACKET NEWLINE pairs
              | NEWLINE L_SQUARE_BRACKET key R_SQUARE_BRACKET NEWLINE pairs
              | L_SQUARE_BRACKET key R_SQUARE_BRACKET NEWLINE'''
+
 
     if len(p) == 5: # Para tabelas vazias!
         key = p[2]
@@ -67,20 +66,19 @@ def p_table(p):
 
 
     if is_dotted_key(key):
-        nestedDicts(key, tables1, pairsDict)
+        nestedDicts(key, tables, pairsDict)
     else:
         if is_dotted_key(key):
             lastKey = split_dot(key)[-1]
-            tables1[lastKey] = pairsDict
+            tables[lastKey] = pairsDict
         else:
-            tables1[key] = pairsDict
+            tables[key] = pairsDict
 
     if is_dotted_key(key):
         keyFinal = split_dot(key)[0]
-        p[0] = {keyFinal: tables1[keyFinal]}
+        p[0] = {keyFinal: tables[keyFinal]} # Não sei porquê que isto está a funcionar (Não deveria estar -> Já tenho a solução correta)
     else:
-        p[0] = {key: tables1[key]}
-    print(tables1)
+        p[0] = {key: tables[key]}
 
     
 
@@ -123,44 +121,49 @@ def nestedDicts(dottedKey, Rdict, last):
     else:
         nested_dict[keys[-1]] = last
 
-# def p_arrayTable(p):
-#     '''arrayTable: L_SQUARE_BRACKET L_SQUARE_BRACKET key R_SQUARE_BRACKET R_SQUARE_BRACKET NEWLINE pairs
-#                  | NEWLINE L_SQUARE_BRACKET L_SQUARE_BRACKET key R_SQUARE_BRACKET R_SQUARE_BRACKET NEWLINE pairs
-#                  | L_SQUARE_BRACKET L_SQUARE_BRACKET key R_SQUARE_BRACKET R_SQUARE_BRACKET NEWLINE'''
+
+def p_arrayTable(p):
+    '''arrayTable : L_SQUARE_BRACKET L_SQUARE_BRACKET key R_SQUARE_BRACKET R_SQUARE_BRACKET NEWLINE pairs
+                  | NEWLINE L_SQUARE_BRACKET L_SQUARE_BRACKET key R_SQUARE_BRACKET R_SQUARE_BRACKET NEWLINE pairs
+                  | L_SQUARE_BRACKET L_SQUARE_BRACKET key R_SQUARE_BRACKET R_SQUARE_BRACKET NEWLINE'''
                 
-#     if len(p) == 7: # Para tabelas vazias!
-#         key = p[3]
-#         pairs = {} 
-#     elif len(p) == 8:
-#         key = p[3]
-#         pairs = p[7]
-#     else:
-#         key = p[4]
-#         pairs = p[8]
+    if len(p) == 7: # Para tabelas vazias!
+        key = p[3]
+        pairs = {} 
+    elif len(p) == 8:
+        key = p[3]
+        pairs = p[7]
+    else:
+        key = p[4]
+        pairs = p[8]
 
-#     pairsDict = {}
-#     for pair in pairs:
-#         if pair[0] in pairsDict.keys():
-#             print(pair[0] + " already defined in table " + key)
-#             pass
-#         else:
-#             if is_dotted_key(pair[0]):
-#                 nestedDicts(pair[0], pairsDict, pair[1])
-#             elif isinline(pair[1]):
-#                 pairsin = {}
-#                 inlineAux(pair[1], pairsin)
-#                 pairsDict[pair[0]] = pairsin
+    pairsDict = {}
+    for pair in pairs:
+        if pair[0] in pairsDict.keys():
+            print(pair[0] + " already defined in table " + key)
+            pass
+        else:
+            if is_dotted_key(pair[0]):
+                nestedDicts(pair[0], pairsDict, pair[1])
+            elif isinline(pair[1]):
+                pairsin = {}
+                inlineAux(pair[1], pairsin)
+                pairsDict[pair[0]] = pairsin
+            else:
+                pairsDict[pair[0]] = pair[1]
 
-#     firstDict = []
-#     if key in     
-#         if is_dotted_key(key):
-#             nestedDicts(key, firstDict, pairsDict)
-#             #print(firstDict)
-#         else:
-#             firstDict[key] = pairsDict        
 
-#     tables.append(table_dict)
-#     p[0] = firstDict
+    if key in tables:
+        if isinstance(tables[key], list): # Verificamos se é uma lista porque pode ser uma tabela já existente
+            tables[key].append(pairsDict)
+        else:
+            print(key + ": Already defined in table")            
+    else:
+        tables[key] = []
+        tables[key].append(pairsDict)        
+    
+
+    p[0] = {key: tables[key]}
 
 
 

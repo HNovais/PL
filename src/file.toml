@@ -16,10 +16,16 @@ coord.a.h = "x"
 
 [egrtjg]
 
+[[arrayT]]
+ola = "rrkkt"
 
+flamingo.filipe = 123
 
 [fruit.ola.ole]
 apple.color = "red"
+
+[[arrayT]]
+teresa = "maria"
 
 [fruit.ola.ole.oli]
 apple.color = "green"
