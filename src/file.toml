@@ -6,8 +6,8 @@ title = "fdsfa"
 
 name = "toml"
 yey = 12
-telmo.olar.fer.efe = 11234
-telmo.olar.oli.rfer = 23233
+telmo.olar = 11234
+
 
 turco = {chines.ola.oee = 1, port.ole = 5, holanda = 3}
 
@@ -23,4 +23,3 @@ apple.color = "red"
 
 [fruit.ola.ole.oli]
 apple.color = "green"
-

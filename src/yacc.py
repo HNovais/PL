@@ -3,6 +3,7 @@ import ply.yacc as yacc
 from lexer import tokens
 
 tables = []
+tables1 = {}
 currentTable = None
 tablesTitles = []
 
@@ -19,12 +20,19 @@ def p_start(p):
 def p_tables(p):
     ''' tables : table
                | tables table'''
+
+
     if len(p) == 2:
         p[0] = p[1]
+    # elif len(p) ==
+    #     key = p[2]
+    #     pairs = {} 
     else:
         p[0] = {}
         p[0].update(p[1])
         p[0].update(p[2])
+    
+
 
 def p_table(p):
     '''table : L_SQUARE_BRACKET key R_SQUARE_BRACKET NEWLINE pairs
@@ -41,37 +49,39 @@ def p_table(p):
         key = p[3]
         pairs = p[6]
     
-    if key not in tablesTitles:
-        tablesTitles.append(key)
-        pairsDict = {}
-        for pair in pairs:
-            if pair[0] in pairsDict.keys():
-                print(pair[0] + " already defined in table " + key)
-                pass
-            else:
-                if is_dotted_key(pair[0]):
-                    nestedDicts(pair[0], pairsDict, pair[1])
-
-                elif isinline(pair[1]):
-                    pairsin = {}
-                    inlineAux(pair[1], pairsin)
-                    pairsDict[pair[0]] = pairsin
-
-
-        firstDict = {}
-        if is_dotted_key(key):
-            nestedDicts(key, firstDict, pairsDict)
-            #print(firstDict)
+ 
+    pairsDict = {}
+    for pair in pairs:
+        if pair[0] in pairsDict.keys():
+            print(pair[0] + " already defined in table " + key)
+            pass
         else:
-            firstDict[key] = pairsDict        
-        
-        table_dict = firstDict
-        tables.append(table_dict)
-        p[0] = table_dict
-    else: 
-        p[0] = {}
-        print("Already exists a table with that name: " + key)
-        pass
+            if is_dotted_key(pair[0]):
+                nestedDicts(pair[0], pairsDict, pair[1])
+            elif isinline(pair[1]):
+                pairsin = {}
+                inlineAux(pair[1], pairsin)
+                pairsDict[pair[0]] = pairsin
+            else:
+                pairsDict[pair[0]] = pair[1]
+
+
+    if is_dotted_key(key):
+        nestedDicts(key, tables1, pairsDict)
+    else:
+        if is_dotted_key(key):
+            lastKey = split_dot(key)[-1]
+            tables1[lastKey] = pairsDict
+        else:
+            tables1[key] = pairsDict
+
+    if is_dotted_key(key):
+        keyFinal = split_dot(key)[0]
+        p[0] = {keyFinal: tables1[keyFinal]}
+    else:
+        p[0] = {key: tables1[key]}
+    print(tables1)
+
     
 
 
@@ -112,6 +122,46 @@ def nestedDicts(dottedKey, Rdict, last):
         print(keys[-1] + " already defined in table " + nested_key)
     else:
         nested_dict[keys[-1]] = last
+
+# def p_arrayTable(p):
+#     '''arrayTable: L_SQUARE_BRACKET L_SQUARE_BRACKET key R_SQUARE_BRACKET R_SQUARE_BRACKET NEWLINE pairs
+#                  | NEWLINE L_SQUARE_BRACKET L_SQUARE_BRACKET key R_SQUARE_BRACKET R_SQUARE_BRACKET NEWLINE pairs
+#                  | L_SQUARE_BRACKET L_SQUARE_BRACKET key R_SQUARE_BRACKET R_SQUARE_BRACKET NEWLINE'''
+                
+#     if len(p) == 7: # Para tabelas vazias!
+#         key = p[3]
+#         pairs = {} 
+#     elif len(p) == 8:
+#         key = p[3]
+#         pairs = p[7]
+#     else:
+#         key = p[4]
+#         pairs = p[8]
+
+#     pairsDict = {}
+#     for pair in pairs:
+#         if pair[0] in pairsDict.keys():
+#             print(pair[0] + " already defined in table " + key)
+#             pass
+#         else:
+#             if is_dotted_key(pair[0]):
+#                 nestedDicts(pair[0], pairsDict, pair[1])
+#             elif isinline(pair[1]):
+#                 pairsin = {}
+#                 inlineAux(pair[1], pairsin)
+#                 pairsDict[pair[0]] = pairsin
+
+#     firstDict = []
+#     if key in     
+#         if is_dotted_key(key):
+#             nestedDicts(key, firstDict, pairsDict)
+#             #print(firstDict)
+#         else:
+#             firstDict[key] = pairsDict        
+
+#     tables.append(table_dict)
+#     p[0] = firstDict
+
 
 
 def p_pairs(p):
