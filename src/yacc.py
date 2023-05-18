@@ -4,6 +4,7 @@ from lexer import tokens
 
 tables = []
 currentTable = None
+tablesTitles = []
 
 def p_start(p):
     '''start : tables
@@ -27,40 +28,92 @@ def p_tables(p):
 
 def p_table(p):
     '''table : L_SQUARE_BRACKET key R_SQUARE_BRACKET NEWLINE pairs
-             | NEWLINE L_SQUARE_BRACKET key R_SQUARE_BRACKET NEWLINE pairs'''
+             | NEWLINE L_SQUARE_BRACKET key R_SQUARE_BRACKET NEWLINE pairs
+             | L_SQUARE_BRACKET key R_SQUARE_BRACKET NEWLINE'''
 
-    if len(p) == 6:
+    if len(p) == 5: # Para tabelas vazias!
+        key = p[2]
+        pairs = {} 
+    elif len(p) == 6:
         key = p[2]
         pairs = p[5]
     else:
         key = p[3]
         pairs = p[6]
-
-    pairsDict = {}
-    for pair in pairs:
-        if pair[0] in pairsDict.keys():
-            print(pair[0] + " already defined in table " + key)
-            pass
-        else:
-            if is_dotted_key(pair[0]):
-                keys = split_dot(pair[0])
-                nested_dict = pairsDict
-                for nested_key in keys[:-1]:
-                    if nested_key not in nested_dict:
-                        nested_dict[nested_key] = {}
-                    nested_dict = nested_dict[nested_key]
-                if keys[-1] in nested_dict.keys():
-                    print(keys[-1] + " already defined in table " + key)
-                else:
-                    nested_dict[keys[-1]] = pair[1]
-            else:
-                pairsDict[pair[0]] = pair[1]
-
-    table_dict = {key: pairsDict}
-    tables.append(table_dict)
-    p[0] = table_dict
-
     
+    if key not in tablesTitles:
+        tablesTitles.append(key)
+        pairsDict = {}
+        for pair in pairs:
+            if pair[0] in pairsDict.keys():
+                print(pair[0] + " already defined in table " + key)
+                pass
+            else:
+                if is_dotted_key(pair[0]):
+                    nestedDicts(pair[0], pairsDict, pair[1])
+
+                elif isinline(pair[1]):
+                    pairsin = {}
+                    inlineAux(pair[1], pairsin)
+                    pairsDict[pair[0]] = pairsin
+
+
+        firstDict = {}
+        if is_dotted_key(key):
+            nestedDicts(key, firstDict, pairsDict)
+            #print(firstDict)
+        else:
+            firstDict[key] = pairsDict        
+        
+        table_dict = firstDict
+        tables.append(table_dict)
+        p[0] = table_dict
+    else: 
+        p[0] = {}
+        print("Already exists a table with that name: " + key)
+        pass
+    
+
+
+def inlineAux(pair, pairsin):
+    for pars in pair:
+        if pars[0] in pairsin.keys():
+            print(" already defined in table " + pars[0])
+        else:
+            if is_dotted_key(pars[0]):
+                nestedDicts(pars[0], pairsin, pars[1])
+            # elif isinline(pars[1]):
+            #     parsin2 = {}
+            #     print("1111111111111111111111111111111111111111111")
+            #     inlineAux(pars[1],pairsin2)
+            #     pairsin[pars[0]] = pairsin2
+            else: 
+                pairsin[pars[0]] = pars[1]
+
+
+def isinline(elemento):
+    if isinstance(elemento, list):  # Verifica se é uma lista
+        if all(isinstance(tupla, tuple) for tupla in elemento):  # Verifica se todos os elementos da lista são tuplas
+            return True
+    return False
+
+
+def nestedDicts(dottedKey, Rdict, last):
+    keys = split_dot(dottedKey) 
+    nested_dict = Rdict 
+    #print(dottedKey)
+    for nested_key in keys[:-1]:  
+        if nested_key not in nested_dict:
+            nested_dict[nested_key] = {}
+            print(nested_key)
+        nested_dict = nested_dict[nested_key]
+
+    if keys[-1] in nested_dict:
+        print(keys[-1] + " already defined in table " + nested_key)
+    else:
+        nested_dict[keys[-1]] = last
+
+
 def p_pairs(p):
     ''' pairs : pair
               | pair pairs'''
@@ -69,10 +122,22 @@ def p_pairs(p):
     else:
         p[0] = [p[1]] + p[2]
 
+# def p_pair(p):
+#     '''pair : key EQUAL value 
+#             | key EQUAL value NEWLINE
+#             | key EQUAL '''
+#     p[0] = (p[1], p[3])
+
 def p_pair(p):
-    '''pair : key EQUAL value 
-            | key EQUAL value NEWLINE'''
-    p[0] = (p[1], p[3])
+    '''pair : key EQUAL value
+            | key EQUAL value NEWLINE
+            | key EQUAL value COMMA
+            | key EQUAL L_CURVE_BRACKET pairs R_CURVE_BRACKET
+            | key EQUAL L_CURVE_BRACKET pairs R_CURVE_BRACKET NEWLINE'''
+    if len(p) >= 6:
+        p[0] = (p[1],p[4])
+    else:
+        p[0] = (p[1], p[3])
 
 def p_key(p):
     ''' key : bare_key
@@ -119,6 +184,8 @@ def p_expression(p):
         p[0] = [p[1]]
     else:
         p[0] = p[1] + [p[3]]
+
+
     
 def p_error(p):
     if p:
@@ -152,6 +219,7 @@ def split_dot(key):
             value[index] += char
 
     return value
+
 
 parser = yacc.yacc()
 

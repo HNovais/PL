@@ -6,8 +6,21 @@ title = "fdsfa"
 
 name = "toml"
 yey = 12
+telmo.olar.fer.efe = 11234
+telmo.olar.oli.rfer = 23233
+
+turco = {chines.ola.oee = 1, port.ole = 5, holanda = 3}
 
 [yws]
-coord.a = "x"
-coord.b = "y"
-coord.something.x = "z"
+coord.a.h = "x"
+
+[egrtjg]
+
+
+
+[fruit.ola.ole]
+apple.color = "red"
+
+[fruit.ola.ole.oli]
+apple.color = "green"
+
