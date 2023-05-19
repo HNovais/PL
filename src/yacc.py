@@ -2,28 +2,42 @@ import json
 import ply.yacc as yacc
 from lexer import tokens
 
-
 tables = {}
-currentTable = None
-tablesTitles = []
 
 def p_start(p):
     '''start : tables
-             | title tables'''
+             | singles start
+             | tables start
+             | singles'''
     if len(p) == 2:
         p[0] = p[1]
     else:
-        d = {"title" : p[1]}
-        d.update(p[2])
-        p[0] = d
+        p[1].update(p[2])
+        p[0] = p[1]
 
-def p_title(p):
-    '''title : TITLE EQUAL value
-             | NEWLINE TITLE EQUAL value'''
-    if len(p) == 4:
-        p[0] = p[3]
+def p_singles(p):
+    '''singles : pairs
+               | NEWLINE pairs'''
+    if len(p) == 2:
+        pairs = p[1]
     else:
-        p[0] = p[4]
+        pairs = p[2]
+
+    for pair in pairs:
+        if pair[0] in tables.keys():
+            print(pair[0] + " already defined in current dictionary")
+            pass
+        else:
+            if is_dotted_key(pair[0]):
+                nestedDicts(pair[0], tables, pair[1])
+            elif isinline(pair[1]):
+                pairsin = {}
+                inlineAux(pair[1], pairsin)
+                tables[pair[0]] = pairsin
+            else:
+                tables[pair[0]] = pair[1]
+
+    p[0] = tables
 
 def p_tables(p):
     ''' tables : table
@@ -233,17 +247,17 @@ def split_dot(key):
 def inlineAux(pair, pairsin):
     for pars in pair:
         if pars[0] in pairsin.keys():
-            print(" already defined in table " + pars[0])
+            print(f"Key '{pars[0]}' already defined in table")
         else:
             if is_dotted_key(pars[0]):
                 nestedDicts(pars[0], pairsin, pars[1])
-            # elif isinline(pars[1]):
-            #     parsin2 = {}
-            #     print("1111111111111111111111111111111111111111111")
-            #     inlineAux(pars[1],pairsin2)
-            #     pairsin[pars[0]] = pairsin2
+            elif isinline(pars[1]):
+                nested_table = {}
+                inlineAux(pars[1], nested_table)
+                pairsin[pars[0]] = nested_table
             else: 
                 pairsin[pars[0]] = pars[1]
+
 
 def isinline(elemento):
     if isinstance(elemento, list):  # Verifica se é uma lista
@@ -271,7 +285,7 @@ with open("file.toml", encoding="utf-8") as f:
 
 result = parser.parse(content)
 
-print(tables)
+# print(tables)
 
 with open("output.json", "w") as f:
     f.write(json.dumps(result, indent=2)) 

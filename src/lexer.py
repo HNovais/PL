@@ -1,7 +1,6 @@
 import ply.lex as lex
 
 tokens = (
-    'TITLE',
     'TEXT',
     'QUOTED_STRING',
     'PLICA_STRING',
@@ -27,7 +26,7 @@ tokens = (
     'NEWLINE'
 )
 
-t_TEXT = r'[a-zA-Z_\-]+'
+t_TEXT = r'[a-zA-Z0-9_\-]+'
 t_NEWLINE = r'\n+'
 t_L_BRACKET = r'\('
 t_R_BRACKET = r'\)'
@@ -38,10 +37,6 @@ t_R_CURVE_BRACKET = r'\}'
 t_EQUAL = '='
 t_COMMA = r','
 t_DOT = r'.'
-
-def t_TITLE(t):
-    r'title'
-    return t
 
 def t_BOOLEAN(t):
     r'true|false'
