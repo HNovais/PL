@@ -40,8 +40,7 @@ t_COMMA = r','
 t_DOT = r'.'
 
 def t_TITLE(t):
-    r'title\s*=\s*"(.*)"'
-    t.value = t.value.split('\"')[1]
+    r'title'
     return t
 
 def t_BOOLEAN(t):
@@ -112,4 +111,4 @@ with open('file.toml', 'r', encoding="utf-8") as file:
         tok = lexer.token()
         if not tok:
             break
-        # print(tok)
+        #print(tok)

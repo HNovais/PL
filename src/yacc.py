@@ -9,13 +9,21 @@ tablesTitles = []
 
 def p_start(p):
     '''start : tables
-             | TITLE NEWLINE tables'''
+             | title tables'''
     if len(p) == 2:
         p[0] = p[1]
     else:
-        dict = {"title" : p[1]}
-        dict.update(p[3])
-        p[0] = dict
+        d = {"title" : p[1]}
+        d.update(p[2])
+        p[0] = d
+
+def p_title(p):
+    '''title : TITLE EQUAL value
+             | NEWLINE TITLE EQUAL value'''
+    if len(p) == 4:
+        p[0] = p[3]
+    else:
+        p[0] = p[4]
 
 def p_tables(p):
     ''' tables : table
@@ -29,14 +37,11 @@ def p_tables(p):
         p[0] = {}
         p[0].update(p[1])
         p[0].update(p[2])
-    
-
 
 def p_table(p):
     '''table : L_SQUARE_BRACKET key R_SQUARE_BRACKET NEWLINE pairs
              | NEWLINE L_SQUARE_BRACKET key R_SQUARE_BRACKET NEWLINE pairs
              | L_SQUARE_BRACKET key R_SQUARE_BRACKET NEWLINE'''
-
 
     if len(p) == 5: # Para tabelas vazias!
         key = p[2]
@@ -48,7 +53,6 @@ def p_table(p):
         key = p[3]
         pairs = p[6]
     
- 
     pairsDict = {}
     for pair in pairs:
         if pair[0] in pairsDict.keys():
@@ -64,7 +68,6 @@ def p_table(p):
             else:
                 pairsDict[pair[0]] = pair[1]
 
-
     if is_dotted_key(key):
         nestedDicts(key, tables, pairsDict)
     else:
@@ -79,48 +82,6 @@ def p_table(p):
         p[0] = {keyFinal: tables[keyFinal]} # Não sei porquê que isto está a funcionar (Não deveria estar -> Já tenho a solução correta)
     else:
         p[0] = {key: tables[key]}
-
-    
-
-
-def inlineAux(pair, pairsin):
-    for pars in pair:
-        if pars[0] in pairsin.keys():
-            print(" already defined in table " + pars[0])
-        else:
-            if is_dotted_key(pars[0]):
-                nestedDicts(pars[0], pairsin, pars[1])
-            # elif isinline(pars[1]):
-            #     parsin2 = {}
-            #     print("1111111111111111111111111111111111111111111")
-            #     inlineAux(pars[1],pairsin2)
-            #     pairsin[pars[0]] = pairsin2
-            else: 
-                pairsin[pars[0]] = pars[1]
-
-
-def isinline(elemento):
-    if isinstance(elemento, list):  # Verifica se é uma lista
-        if all(isinstance(tupla, tuple) for tupla in elemento):  # Verifica se todos os elementos da lista são tuplas
-            return True
-    return False
-
-
-def nestedDicts(dottedKey, Rdict, last):
-    keys = split_dot(dottedKey) 
-    nested_dict = Rdict 
-    #print(dottedKey)
-    for nested_key in keys[:-1]:  
-        if nested_key not in nested_dict:
-            nested_dict[nested_key] = {}
-            print(nested_key)
-        nested_dict = nested_dict[nested_key]
-
-    if keys[-1] in nested_dict:
-        print(keys[-1] + " already defined in table " + nested_key)
-    else:
-        nested_dict[keys[-1]] = last
-
 
 def p_arrayTable(p):
     '''arrayTable : L_SQUARE_BRACKET L_SQUARE_BRACKET key R_SQUARE_BRACKET R_SQUARE_BRACKET NEWLINE pairs
@@ -152,7 +113,6 @@ def p_arrayTable(p):
             else:
                 pairsDict[pair[0]] = pair[1]
 
-
     if key in tables:
         if isinstance(tables[key], list): # Verificamos se é uma lista porque pode ser uma tabela já existente
             tables[key].append(pairsDict)
@@ -164,8 +124,6 @@ def p_arrayTable(p):
     
 
     p[0] = {key: tables[key]}
-
-
 
 def p_pairs(p):
     ''' pairs : pair
@@ -238,7 +196,6 @@ def p_expression(p):
     else:
         p[0] = p[1] + [p[3]]
 
-
     
 def p_error(p):
     if p:
@@ -273,6 +230,39 @@ def split_dot(key):
 
     return value
 
+def inlineAux(pair, pairsin):
+    for pars in pair:
+        if pars[0] in pairsin.keys():
+            print(" already defined in table " + pars[0])
+        else:
+            if is_dotted_key(pars[0]):
+                nestedDicts(pars[0], pairsin, pars[1])
+            # elif isinline(pars[1]):
+            #     parsin2 = {}
+            #     print("1111111111111111111111111111111111111111111")
+            #     inlineAux(pars[1],pairsin2)
+            #     pairsin[pars[0]] = pairsin2
+            else: 
+                pairsin[pars[0]] = pars[1]
+
+def isinline(elemento):
+    if isinstance(elemento, list):  # Verifica se é uma lista
+        if all(isinstance(tupla, tuple) for tupla in elemento):  # Verifica se todos os elementos da lista são tuplas
+            return True
+    return False
+
+def nestedDicts(dottedKey, Rdict, last):
+    keys = split_dot(dottedKey) 
+    nested_dict = Rdict 
+    for nested_key in keys[:-1]:  
+        if nested_key not in nested_dict:
+            nested_dict[nested_key] = {}
+        nested_dict = nested_dict[nested_key]
+
+    if keys[-1] in nested_dict:
+        print(keys[-1] + " already defined in table " + nested_key)
+    else:
+        nested_dict[keys[-1]] = last
 
 parser = yacc.yacc()
 
