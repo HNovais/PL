@@ -77,8 +77,7 @@ def p_table(p):
                 nestedDicts(pair[0], pairsDict, pair[1])
             elif isinline(pair[1]):
                 pairsin = {}
-                inlineAux(pair[1], pairsin)
-                pairsDict[pair[0]] = pairsin
+                pairsDict[pair[0]] = inlineAux(pair[1], pairsin)
             else:
                 pairsDict[pair[0]] = pair[1]
 
@@ -93,7 +92,7 @@ def p_table(p):
 
     if is_dotted_key(key):
         keyFinal = split_dot(key)[0]
-        p[0] = {keyFinal: tables[keyFinal]} # Não sei porquê que isto está a funcionar (Não deveria estar -> Já tenho a solução correta)
+        p[0] = {keyFinal: tables[keyFinal]}
     else:
         p[0] = {key: tables[key]}
 
@@ -122,8 +121,7 @@ def p_arrayTable(p):
                 nestedDicts(pair[0], pairsDict, pair[1])
             elif isinline(pair[1]):
                 pairsin = {}
-                inlineAux(pair[1], pairsin)
-                pairsDict[pair[0]] = pairsin
+                pairsDict[pair[0]] = inlineAux(pair[1], pairsin)
             else:
                 pairsDict[pair[0]] = pair[1]
 
@@ -158,6 +156,7 @@ def p_pair(p):
             | key EQUAL value NEWLINE
             | key EQUAL value COMMA
             | key EQUAL L_CURVE_BRACKET pairs R_CURVE_BRACKET
+            | key EQUAL L_CURVE_BRACKET pairs R_CURVE_BRACKET COMMA
             | key EQUAL L_CURVE_BRACKET pairs R_CURVE_BRACKET NEWLINE'''
     if len(p) >= 6:
         p[0] = (p[1],p[4])
@@ -244,6 +243,7 @@ def split_dot(key):
 
     return value
 
+
 def inlineAux(pair, pairsin):
     for pars in pair:
         if pars[0] in pairsin.keys():
@@ -253,10 +253,11 @@ def inlineAux(pair, pairsin):
                 nestedDicts(pars[0], pairsin, pars[1])
             elif isinline(pars[1]):
                 nested_table = {}
-                inlineAux(pars[1], nested_table)
-                pairsin[pars[0]] = nested_table
+                pairsin[pars[0]] = inlineAux(pars[1], nested_table)
             else: 
                 pairsin[pars[0]] = pars[1]
+
+    return pairsin
 
 
 def isinline(elemento):
@@ -285,7 +286,7 @@ with open("file.toml", encoding="utf-8") as f:
 
 result = parser.parse(content)
 
-# print(tables)
+print(tables)
 
 with open("output.json", "w") as f:
     f.write(json.dumps(result, indent=2)) 

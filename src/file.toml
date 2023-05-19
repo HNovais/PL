@@ -1,2 +1,27 @@
-name = { first = "Tom", last = "Preston-Werner", point = { x = 1, y = 2 }}
-animal = { type.name = "pug" }
+# This is a full-line comment
+
+title = "fdsfa" 
+
+[table]
+
+name = "toml"
+yey = 12
+telmo.olar = 11234
+
+turco = {chines.ola.oee = 1, port = {x = 5, y = "fil"}, holanda = 3}
+
+[yws]
+coord.a.h = "x"
+
+[egrtjg]
+
+[[arrayT]]
+ola = "novo"
+ola1 = "nuevo"
+
+
+[fruit.ola.ole]
+apple.color = "red"
+
+[fruit.ola.ole.oli]
+apple.color = "green"
