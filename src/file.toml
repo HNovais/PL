@@ -1,27 +1,22 @@
-# This is a full-line comment
+[[fruits]]
+name = "apple"
 
-title = "fdsfa" 
+[fruits.physical]  # subtable
+color = "red"
+shape = "round"
 
-[table]
+[[fruits.varieties]]  # nested array of tables
+name = "red delicious"
 
-name = "toml"
-yey = 12
-telmo.olar = 11234
+[[fruits]]
+name = "apple"
 
-turco = {chines.ola.oee = 1, port = {x = 5, y = "fil"}, holanda = 3}
-
-[yws]
-coord.a.h = "x"
-
-[egrtjg]
-
-[[arrayT]]
-ola = "novo"
-ola1 = "nuevo"
+[[fruits.varieties]]
+name = "granny smith"
 
 
-[fruit.ola.ole]
-apple.color = "red"
+[[fruits]]
+name = "banana"
 
-[fruit.ola.ole.oli]
-apple.color = "green"
+[[fruits.varieties]]
+name = "plantain"

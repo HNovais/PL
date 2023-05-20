@@ -29,7 +29,7 @@ def p_singles(p):
             pass
         else:
             if is_dotted_key(pair[0]):
-                nestedDicts(pair[0], tables, pair[1])
+                nestedDicts(pair[0], tables, pair[1], 0)
             elif isinline(pair[1]):
                 pairsin = {}
                 inlineAux(pair[1], pairsin)
@@ -74,7 +74,7 @@ def p_table(p):
             pass
         else:
             if is_dotted_key(pair[0]):
-                nestedDicts(pair[0], pairsDict, pair[1])
+                nestedDicts(pair[0], pairsDict, pair[1], 0)
             elif isinline(pair[1]):
                 pairsin = {}
                 pairsDict[pair[0]] = inlineAux(pair[1], pairsin)
@@ -82,7 +82,12 @@ def p_table(p):
                 pairsDict[pair[0]] = pair[1]
 
     if is_dotted_key(key):
-        nestedDicts(key, tables, pairsDict)
+        keyInitial = split_dot(key)[0]
+        if isinstance(tables[keyInitial], list): # Para o caso das subtables de array tables
+           print(tables[keyInitial][-1])
+           nestedDicts(removeFirst(key), tables[keyInitial][-1], pairsDict, 0)
+        else:   
+            nestedDicts(key, tables, pairsDict, 0)
     else:
         if is_dotted_key(key):
             lastKey = split_dot(key)[-1]
@@ -118,14 +123,23 @@ def p_arrayTable(p):
             pass
         else:
             if is_dotted_key(pair[0]):
-                nestedDicts(pair[0], pairsDict, pair[1])
+                nestedDicts(pair[0], pairsDict, pair[1], 0)
             elif isinline(pair[1]):
                 pairsin = {}
                 pairsDict[pair[0]] = inlineAux(pair[1], pairsin)
             else:
                 pairsDict[pair[0]] = pair[1]
 
-    if key in tables:
+    if is_dotted_key(key):
+        keyInitial = split_dot(key)[0]
+        if keyInitial not in tables:
+            print(keyInitial + " must be defined before this nested array table!")
+        else:
+            # key[1:] Porque já existe a key na table uma vez que tamos a considerar uma nested table desta
+            # tables[keyInitial][-1] Estamos a colocar na ultima instancia criada da key uma vez que devemos meter sempre na ultima que surgiu
+            nestedDicts(removeFirst(key), tables[keyInitial][-1], pairsDict, 1)
+
+    elif key in tables:
         if isinstance(tables[key], list): # Verificamos se é uma lista porque pode ser uma tabela já existente
             tables[key].append(pairsDict)
         else:
@@ -134,8 +148,10 @@ def p_arrayTable(p):
         tables[key] = []
         tables[key].append(pairsDict)        
     
-
-    p[0] = {key: tables[key]}
+    if is_dotted_key(key):
+        p[0] = {keyInitial: tables[keyInitial]}
+    else:
+        p[0] = {key: tables[key]}
 
 def p_pairs(p):
     ''' pairs : pair
@@ -145,11 +161,6 @@ def p_pairs(p):
     else:
         p[0] = [p[1]] + p[2]
 
-# def p_pair(p):
-#     '''pair : key EQUAL value 
-#             | key EQUAL value NEWLINE
-#             | key EQUAL '''
-#     p[0] = (p[1], p[3])
 
 def p_pair(p):
     '''pair : key EQUAL value
@@ -250,7 +261,7 @@ def inlineAux(pair, pairsin):
             print(f"Key '{pars[0]}' already defined in table")
         else:
             if is_dotted_key(pars[0]):
-                nestedDicts(pars[0], pairsin, pars[1])
+                nestedDicts(pars[0], pairsin, pars[1], 0)
             elif isinline(pars[1]):
                 nested_table = {}
                 pairsin[pars[0]] = inlineAux(pars[1], nested_table)
@@ -266,16 +277,27 @@ def isinline(elemento):
             return True
     return False
 
-def nestedDicts(dottedKey, Rdict, last):
-    keys = split_dot(dottedKey) 
-    nested_dict = Rdict 
+def removeFirst(dottedKey):
+    elements = dottedKey.split('.')
+    if len(elements) >= 2:
+        elements.pop(0)
+    return '.'.join(elements)
+
+def nestedDicts(dottedKey, Rdict, last, array):
+    keys = split_dot(dottedKey)
+    nested_dict = Rdict
     for nested_key in keys[:-1]:  
         if nested_key not in nested_dict:
             nested_dict[nested_key] = {}
         nested_dict = nested_dict[nested_key]
 
-    if keys[-1] in nested_dict:
-        print(keys[-1] + " already defined in table " + nested_key)
+    if keys[-1] in nested_dict and not array:
+        print(keys[-1] + " already defined in table")
+    elif keys[-1] in nested_dict and array: # Quando se trata de uma key que ja possui um array neste dicionário, apenas damos append
+        nested_dict[keys[-1]].append(last)
+    elif array:
+        nested_dict[keys[-1]] = []
+        nested_dict[keys[-1]].append(last)
     else:
         nested_dict[keys[-1]] = last
 
