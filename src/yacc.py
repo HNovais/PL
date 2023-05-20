@@ -270,13 +270,14 @@ def inlineAux(pair, pairsin):
 
     return pairsin
 
-
+# Função que verifica se uma linha é uma inline
 def isinline(elemento):
     if isinstance(elemento, list):  # Verifica se é uma lista
         if all(isinstance(tupla, tuple) for tupla in elemento):  # Verifica se todos os elementos da lista são tuplas
             return True
     return False
 
+# Funçao que remove o primeiro elemento de uma dottedKey
 def removeFirst(dottedKey):
     elements = dottedKey.split('.')
     if len(elements) >= 2:
