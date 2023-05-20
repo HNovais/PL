@@ -1,8 +1,14 @@
 import ply.lex as lex
+import re
+
 
 tokens = (
     'TEXT',
     'QUOTED_STRING',
+    'MULTI_LINE',
+    'HEXADECIMAL',
+    'OCTAL',
+    'BINARY',
     'PLICA_STRING',
     'ML_QUOTED_STRING',
     'ML_PLICA_STRING',
@@ -36,7 +42,7 @@ t_L_CURVE_BRACKET = r'\{'
 t_R_CURVE_BRACKET = r'\}'
 t_EQUAL = '='
 t_COMMA = r','
-t_DOT = r'.'
+t_DOT = r'\.'
 
 def t_BOOLEAN(t):
     r'true|false'
@@ -45,6 +51,18 @@ def t_BOOLEAN(t):
 def t_COMMENT(t):
     r'\#.*'
     pass
+
+def t_HEXADECIMAL(t):
+    r'0x([A-F0-9)+|[a-f0-9]+)'
+    return t
+
+def t_OCTAL(t):
+    r'0o[0-7]+'
+    return t
+
+def t_BINARY(t):
+    r'0b[0-1]+'
+    return t
 
 def t_O_DATE_TIME(t):
     r'\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}(?::\d{2})?)'
@@ -72,23 +90,30 @@ def t_INT(t):
     t.value = t.value.replace('_', '') 
     return t  
 
+def t_ML_QUOTED_STRING(t):
+    r'"""(?:[^\"]|\\.)*?"""'
+    t.value = t.value[3:-3]
+    t.value = re.sub(r'\\(\s)*', '', t.value)
+    return t
+
 def t_QUOTED_STRING(t):
     r'\"([^\\\n]|(\\.))*?\"'
     t.value = t.value[1:-1]
     return t
 
+
+def t_ML_PLICA_STRING(t):
+    r'\'{3}(\n|.)*?\'{3}'
+    t.value = t.value[3:-3]
+    return t
+
+
 def t_PLICA_STRING(t):
-    r'\'(.*)\''
+    r'\'[^\']*\''
     t.value = t.value[1:-1]
     return t
 
-def t_ML_QUOTED_STRING(t):
-    r'"""(\n|.)*?"""'
-    return t
 
-def t_ML_PLICA_STRING(t): 
-    r'\'{3}(\n|.)*?\'{3}'
-    return t
 
 t_ignore = ' \t'
 
@@ -106,4 +131,4 @@ with open('file.toml', 'r', encoding="utf-8") as file:
         tok = lexer.token()
         if not tok:
             break
-        #print(tok)
+        print(tok)

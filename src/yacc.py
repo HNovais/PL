@@ -177,20 +177,33 @@ def p_pair(p):
 def p_key(p):
     ''' key : bare_key
             | quoted_key
+            | float_key
             | key DOT key'''
     if len(p) == 4:
         p[0] = p[1] + '.' + p[3]
+        print("aqui" + p[0])
+    elif is_float(p[1]):
+        int,dec = split_float(p[1])
+        p[0] = int + "." + dec
+
     else:
         p[0] = p[1]
 
+
+def p_float_key(p):
+    ''' float_key : FLOAT'''
+    p[0] = p[1]
+
 def p_bare_key(p):
     ''' bare_key : TEXT
-                 | INT '''
+                 | INT'''
     p[0] = p[1]
 
 def p_quoted_key(p):
     ''' quoted_key : QUOTED_STRING
-                   | PLICA_STRING'''
+                   | ML_QUOTED_STRING
+                   | PLICA_STRING
+                   |'''
     p[0] = p[1]
     
 def p_value(p):
@@ -204,13 +217,33 @@ def p_value(p):
               | O_DATE_TIME
               | L_DATE_TIME
               | LOCAL_DATE
-              | LOCAL_TIME 
+              | LOCAL_TIME
+              | octal
+              | binary
+              | hexadecimal
               | array'''
     p[0] = p[1]
 
 def p_array(p):
-    'array : L_SQUARE_BRACKET expression R_SQUARE_BRACKET'
-    p[0] = p[2]
+    '''array : L_SQUARE_BRACKET expression R_SQUARE_BRACKET
+            | L_SQUARE_BRACKET R_SQUARE_BRACKET'''
+    if len(p) ==4:
+        p[0] = p[2]
+    else:
+        p[0] = p[1] + p[2]
+
+def p_hexadecimal(p):
+    ''' hexadecimal : HEXADECIMAL'''
+    p[0] = int(p[1],16)
+
+
+def p_octal(p):
+    ''' octal : OCTAL'''
+    p[0] = int(p[1],8)
+
+def p_ninary(p):
+    ''' binary : BINARY'''
+    p[0] = int(p[1],2)
 
 def p_expression(p):
     ''' expression : expression COMMA value
@@ -276,6 +309,16 @@ def isinline(elemento):
         if all(isinstance(tupla, tuple) for tupla in elemento):  # Verifica se todos os elementos da lista são tuplas
             return True
     return False
+
+#Verifica se é float
+def is_float(obj):
+    return isinstance(obj, float)
+
+# divide float
+def split_float(num):
+    num_str = str(num)
+    integer_part, decimal_part = num_str.split('.')
+    return integer_part, decimal_part
 
 # Funçao que remove o primeiro elemento de uma dottedKey
 def removeFirst(dottedKey):
