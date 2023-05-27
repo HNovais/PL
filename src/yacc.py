@@ -23,27 +23,15 @@ def p_singles(p):
     else:
         pairs = p[2]
 
-    for pair in pairs:
-        if pair[0] in tables.keys():
-            print(pair[0] + " already defined in current dictionary")
-            pass
-        else:
-            if is_dotted_key(pair[0]):
-                nestedDicts(pair[0], tables, pair[1], 0)
-            elif isinline(pair[1]):
-                pairsin = {}
-                inlineAux(pair[1], pairsin)
-                tables[pair[0]] = pairsin
-            else:
-                tables[pair[0]] = pair[1]
+    loadPairs(pairs, None)
 
     p[0] = tables
 
 def p_tables(p):
     ''' tables : table
-               | tables table
+               | table tables 
                | arrayTable
-               | tables arrayTable'''
+               | arrayTable tables '''
 
     if len(p) == 2:
         p[0] = p[1]
@@ -68,37 +56,21 @@ def p_table(p):
         pairs = p[6]
     
     pairsDict = {}
-    for pair in pairs:
-        if pair[0] in pairsDict.keys():
-            print(pair[0] + " already defined in table " + key)
-            pass
-        else:
-            if is_dotted_key(pair[0]):
-                nestedDicts(pair[0], pairsDict, pair[1], 0)
-            elif isinline(pair[1]):
-                pairsin = {}
-                pairsDict[pair[0]] = inlineAux(pair[1], pairsin)
-            else:
-                pairsDict[pair[0]] = pair[1]
+    loadPairs(pairs, pairsDict)
 
     if is_dotted_key(key):
         keyInitial = split_dot(key)[0]
-        if isinstance(tables[keyInitial], list): # Para o caso das subtables de array tables
-           print(tables[keyInitial][-1])
-           nestedDicts(removeFirst(key), tables[keyInitial][-1], pairsDict, 0)
+        if keyInitial in tables and isinstance(tables[keyInitial], list): # Para o caso das subtables de array tables
+            nestedDicts(removeFirst(key), tables[keyInitial][-1], pairsDict, 0)
         else:   
             nestedDicts(key, tables, pairsDict, 0)
-    else:
-        if is_dotted_key(key):
-            lastKey = split_dot(key)[-1]
-            tables[lastKey] = pairsDict
-        else:
-            tables[key] = pairsDict
-
-    if is_dotted_key(key):
+        lastKey = split_dot(key)[-1]
+        tables[lastKey] = pairsDict
         keyFinal = split_dot(key)[0]
         p[0] = {keyFinal: tables[keyFinal]}
+
     else:
+        tables[key] = pairsDict
         p[0] = {key: tables[key]}
 
 def p_arrayTable(p):
@@ -117,41 +89,26 @@ def p_arrayTable(p):
         pairs = p[8]
 
     pairsDict = {}
-    for pair in pairs:
-        if pair[0] in pairsDict.keys():
-            print(pair[0] + " already defined in table " + key)
-            pass
-        else:
-            if is_dotted_key(pair[0]):
-                nestedDicts(pair[0], pairsDict, pair[1], 0)
-            elif isinline(pair[1]):
-                pairsin = {}
-                pairsDict[pair[0]] = inlineAux(pair[1], pairsin)
-            else:
-                pairsDict[pair[0]] = pair[1]
+    loadPairs(pairs, pairsDict)
 
     if is_dotted_key(key):
         keyInitial = split_dot(key)[0]
         if keyInitial not in tables:
             print(keyInitial + " must be defined before this nested array table!")
         else:
-            # key[1:] Porque já existe a key na table uma vez que tamos a considerar uma nested table desta
-            # tables[keyInitial][-1] Estamos a colocar na ultima instancia criada da key uma vez que devemos meter sempre na ultima que surgiu
             nestedDicts(removeFirst(key), tables[keyInitial][-1], pairsDict, 1)
+        p[0] = {keyInitial: tables[keyInitial]}
 
     elif key in tables:
         if isinstance(tables[key], list): # Verificamos se é uma lista porque pode ser uma tabela já existente
             tables[key].append(pairsDict)
+            p[0] = {key: tables[key]}
         else:
             print(key + ": Already defined in table")            
     else:
         tables[key] = []
-        tables[key].append(pairsDict)        
-    
-    if is_dotted_key(key):
-        p[0] = {keyInitial: tables[keyInitial]}
-    else:
-        p[0] = {key: tables[key]}
+        tables[key].append(pairsDict)     
+        p[0] = {key: tables[key]}   
 
 def p_pairs(p):
     ''' pairs : pair
@@ -160,7 +117,6 @@ def p_pairs(p):
         p[0] = [p[1]]
     else:
         p[0] = [p[1]] + p[2]
-
 
 def p_pair(p):
     '''pair : key EQUAL value
@@ -177,33 +133,25 @@ def p_pair(p):
 def p_key(p):
     ''' key : bare_key
             | quoted_key
-            | float_key
             | key DOT key'''
     if len(p) == 4:
         p[0] = p[1] + '.' + p[3]
-        print("aqui" + p[0])
     elif is_float(p[1]):
         int,dec = split_float(p[1])
         p[0] = int + "." + dec
-
     else:
         p[0] = p[1]
 
-
-def p_float_key(p):
-    ''' float_key : FLOAT'''
-    p[0] = p[1]
-
 def p_bare_key(p):
     ''' bare_key : TEXT
-                 | INT'''
+                 | INT
+                 | FLOAT'''
     p[0] = p[1]
 
 def p_quoted_key(p):
     ''' quoted_key : QUOTED_STRING
                    | ML_QUOTED_STRING
-                   | PLICA_STRING
-                   |'''
+                   | PLICA_STRING'''
     p[0] = p[1]
     
 def p_value(p):
@@ -213,6 +161,7 @@ def p_value(p):
               | ML_PLICA_STRING
               | INT
               | FLOAT
+              | O_FLOAT
               | BOOLEAN
               | O_DATE_TIME
               | L_DATE_TIME
@@ -236,12 +185,11 @@ def p_hexadecimal(p):
     ''' hexadecimal : HEXADECIMAL'''
     p[0] = int(p[1],16)
 
-
 def p_octal(p):
     ''' octal : OCTAL'''
     p[0] = int(p[1],8)
 
-def p_ninary(p):
+def p_binary(p):
     ''' binary : BINARY'''
     p[0] = int(p[1],2)
 
@@ -252,7 +200,6 @@ def p_expression(p):
         p[0] = [p[1]]
     else:
         p[0] = p[1] + [p[3]]
-
     
 def p_error(p):
     if p:
@@ -260,6 +207,36 @@ def p_error(p):
     else:
         print("Syntax error: unexpected end of input")
     return None
+
+def loadPairs(pairs, dic):
+    if dic == None:
+        for pair in pairs:
+            if pair[0] in tables.keys():
+                print(pair[0] + " already defined in current dictionary")
+                pass
+            else:
+                if is_dotted_key(pair[0]):
+                    nestedDicts(pair[0], tables, pair[1], 0)
+                elif isinline(pair[1]):
+                    pairsin = {}
+                    inlineAux(pair[1], pairsin)
+                    tables[pair[0]] = pairsin
+                else:
+                    tables[pair[0]] = pair[1]
+    else:
+        for pair in pairs:
+            if pair[0] in dic.keys():
+                print(pair[0] + " already defined in current dictionary")
+                pass
+            else:
+                if is_dotted_key(pair[0]):
+                    nestedDicts(pair[0], dic, pair[1], 0)
+                elif isinline(pair[1]):
+                    pairsin = {}
+                    inlineAux(pair[1], pairsin)
+                    dic[pair[0]] = pairsin
+                else:
+                    dic[pair[0]] = pair[1]
 
 def is_dotted_key(key):
     quotes = False
@@ -286,7 +263,6 @@ def split_dot(key):
             value[index] += char
 
     return value
-
 
 def inlineAux(pair, pairsin):
     for pars in pair:
@@ -351,8 +327,6 @@ with open("file.toml", encoding="utf-8") as f:
     content = f.read()
 
 result = parser.parse(content)
-
-print(tables)
 
 with open("output.json", "w") as f:
     f.write(json.dumps(result, indent=2)) 

@@ -5,7 +5,6 @@ import re
 tokens = (
     'TEXT',
     'QUOTED_STRING',
-    'MULTI_LINE',
     'HEXADECIMAL',
     'OCTAL',
     'BINARY',
@@ -23,19 +22,17 @@ tokens = (
     'EQUAL',
     'COMMA',
     'DOT',
-    'L_BRACKET',
-    'R_BRACKET',
     'L_SQUARE_BRACKET',
     'R_SQUARE_BRACKET',
     'L_CURVE_BRACKET',
     'R_CURVE_BRACKET',
-    'NEWLINE'
+    'NEWLINE',
+    'O_FLOAT'
 )
 
+t_O_FLOAT = r'[+-]?(?:inf|nan)'
 t_TEXT = r'[a-zA-Z0-9_\-]+'
 t_NEWLINE = r'\n+'
-t_L_BRACKET = r'\('
-t_R_BRACKET = r'\)'
 t_L_SQUARE_BRACKET = r'\['
 t_R_SQUARE_BRACKET = r'\]'
 t_L_CURVE_BRACKET = r'\{'
@@ -53,7 +50,7 @@ def t_COMMENT(t):
     pass
 
 def t_HEXADECIMAL(t):
-    r'0x([A-F0-9)+|[a-f0-9]+)'
+    r'0x([a-zA-Z0-9\_]+)'
     return t
 
 def t_OCTAL(t):
@@ -113,8 +110,6 @@ def t_PLICA_STRING(t):
     t.value = t.value[1:-1]
     return t
 
-
-
 t_ignore = ' \t'
 
 def t_error(t):
@@ -131,4 +126,4 @@ with open('file.toml', 'r', encoding="utf-8") as file:
         tok = lexer.token()
         if not tok:
             break
-        print(tok)
+        #print(tok)

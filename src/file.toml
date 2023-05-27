@@ -1,53 +1,14 @@
-# This is a full-line comment
-
-title = "fdsfa" 
-
-turco = {chines.ola.oee = 1, port = {x = 5, y = "fil"}, holanda = 3}
-
-[table]
-
-name = "toml"
-yey = 12
-telmo.olar = 11234
-
-turco = {chines.ola.oee = 1, port = {x = 5, y = "fil"}, holanda = 3}
-
-[yws]
-coord.a.h = "x"
-
-[egrtjg]
-
-[[arrayT]]
-ola = "novo"
-ola1 = "nuevo"
-
-[[arrayT.fruit]]
-nova = 123
-
-[[arrayT]]
-hosp = "new"
-test = 159
-
-
+# INVALID TOML DOC
 [[fruits]]
 name = "apple"
 
-[fruits.physical]  # subtable
-color = "red"
-shape = "round"
-
-[[fruits.varieties]]  # nested array of tables
+[[fruits.varieties]]
 name = "red delicious"
 
-[[fruits]]
-name = "apple"
-
-[[fruits.varieties]]
+# INVALID: This table conflicts with the previous array of tables
+[fruits.varieties]
 name = "granny smith"
 
-
-[[fruits]]
-name = "banana"
-
-[[fruits.varieties]]
-name = "plantain"
+[fruits.physical]
+color = "red"
+shape = "round"
