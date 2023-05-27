@@ -78,7 +78,7 @@ def p_arrayTable(p):
                   | NEWLINE L_SQUARE_BRACKET L_SQUARE_BRACKET key R_SQUARE_BRACKET R_SQUARE_BRACKET NEWLINE pairs
                   | L_SQUARE_BRACKET L_SQUARE_BRACKET key R_SQUARE_BRACKET R_SQUARE_BRACKET NEWLINE'''
                 
-    if len(p) == 7: # Para tabelas vazias!
+    if len(p) == 7:
         key = p[3]
         pairs = {} 
     elif len(p) == 8:
@@ -96,11 +96,15 @@ def p_arrayTable(p):
         if keyInitial not in tables:
             print(keyInitial + " must be defined before this nested array table!")
         else:
-            nestedDicts(removeFirst(key), tables[keyInitial][-1], pairsDict, 1)
+            newKey = removeFirst(key)
+            if removeFirst(key) in tables:
+                print(newKey + " already defined in table")
+            else:
+                nestedDicts(newKey, tables[keyInitial][-1], pairsDict, 1)
         p[0] = {keyInitial: tables[keyInitial]}
 
     elif key in tables:
-        if isinstance(tables[key], list): # Verificamos se é uma lista porque pode ser uma tabela já existente
+        if isinstance(tables[key], list): 
             tables[key].append(pairsDict)
             p[0] = {key: tables[key]}
         else:
@@ -279,24 +283,20 @@ def inlineAux(pair, pairsin):
 
     return pairsin
 
-# Função que verifica se uma linha é uma inline
 def isinline(elemento):
     if isinstance(elemento, list):  # Verifica se é uma lista
         if all(isinstance(tupla, tuple) for tupla in elemento):  # Verifica se todos os elementos da lista são tuplas
             return True
     return False
 
-#Verifica se é float
 def is_float(obj):
     return isinstance(obj, float)
 
-# divide float
 def split_float(num):
     num_str = str(num)
     integer_part, decimal_part = num_str.split('.')
     return integer_part, decimal_part
 
-# Funçao que remove o primeiro elemento de uma dottedKey
 def removeFirst(dottedKey):
     elements = dottedKey.split('.')
     if len(elements) >= 2:
