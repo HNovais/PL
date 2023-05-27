@@ -95,10 +95,7 @@ def p_arrayTable(p):
             print(keyInitial + " must be defined before this nested array table!")
         else:
             newKey = removeFirst(key)
-            if removeFirst(key) in tables:
-                print(newKey + " already defined in table")
-            else:
-                nestedDicts(newKey, tables[keyInitial][-1], pairsDict, 1)
+            nestedDicts(newKey, tables[keyInitial][-1], pairsDict, 1)
         p[0] = {keyInitial: tables[keyInitial]}
 
     elif key in tables:
@@ -127,6 +124,7 @@ def p_pair(p):
             | key EQUAL L_CURVE_BRACKET pairs R_CURVE_BRACKET
             | key EQUAL L_CURVE_BRACKET pairs R_CURVE_BRACKET COMMA
             | key EQUAL L_CURVE_BRACKET pairs R_CURVE_BRACKET NEWLINE'''
+
     if len(p) >= 6:
         p[0] = (p[1],p[4])
     else:
@@ -177,8 +175,8 @@ def p_value(p):
 
 def p_array(p):
     '''array : L_SQUARE_BRACKET expression R_SQUARE_BRACKET
-            | L_SQUARE_BRACKET R_SQUARE_BRACKET'''
-    if len(p) ==4:
+             | L_SQUARE_BRACKET R_SQUARE_BRACKET'''
+    if len(p) == 4:
         p[0] = p[2]
     else:
         p[0] = p[1] + p[2]
