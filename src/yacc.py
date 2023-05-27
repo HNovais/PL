@@ -64,8 +64,6 @@ def p_table(p):
             nestedDicts(removeFirst(key), tables[keyInitial][-1], pairsDict, 0)
         else:   
             nestedDicts(key, tables, pairsDict, 0)
-        lastKey = split_dot(key)[-1]
-        tables[lastKey] = pairsDict
         keyFinal = split_dot(key)[0]
         p[0] = {keyFinal: tables[keyFinal]}
 
