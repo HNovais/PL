@@ -85,6 +85,7 @@ def t_FLOAT(t):
 def t_INT(t):
     r'[+-]*\d+(?:_\d+)*'
     t.value = t.value.replace('_', '') 
+    t.value = int(t.value)
     return t  
 
 def t_ML_QUOTED_STRING(t):
@@ -126,4 +127,4 @@ with open('file.toml', 'r', encoding="utf-8") as file:
         tok = lexer.token()
         if not tok:
             break
-        #print(tok)
+        print(tok)

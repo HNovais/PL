@@ -195,11 +195,19 @@ def p_binary(p):
 
 def p_expression(p):
     ''' expression : expression COMMA value
-                   | value '''
+                   | expression COMMA newvalue
+                   | value 
+                   | value NEWLINE
+                   | newvalue'''
     if len(p) == 2:
         p[0] = [p[1]]
     else:
         p[0] = p[1] + [p[3]]
+
+def p_newvalue(p):
+    '''newvalue : NEWLINE value
+                | NEWLINE value NEWLINE'''
+    p[0] = p[2]
     
 def p_error(p):
     if p:
@@ -319,10 +327,17 @@ def nestedDicts(dottedKey, Rdict, last, array):
 
 parser = yacc.yacc()
 
+
 with open("file.toml", encoding="utf-8") as f:
     content = f.read()
 
-result = parser.parse(content)
+try:
+    result = parser.parse(content)
+    print("Parsing successful")
+except yacc.YaccError as e:
+    print("Syntax error encountered")
+    error_message = str(e)
+    print("Error message:", error_message)
 
 with open("output.json", "w") as f:
     f.write(json.dumps(result, indent=2)) 
