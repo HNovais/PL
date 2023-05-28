@@ -127,4 +127,4 @@ with open('file.toml', 'r', encoding="utf-8") as file:
         tok = lexer.token()
         if not tok:
             break
-        print(tok)
+        #print(tok)

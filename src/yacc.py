@@ -123,12 +123,19 @@ def p_pair(p):
             | key EQUAL value COMMA
             | key EQUAL L_CURVE_BRACKET pairs R_CURVE_BRACKET
             | key EQUAL L_CURVE_BRACKET pairs R_CURVE_BRACKET COMMA
-            | key EQUAL L_CURVE_BRACKET pairs R_CURVE_BRACKET NEWLINE'''
+            | key EQUAL L_CURVE_BRACKET pairs R_CURVE_BRACKET NEWLINE
+            | keyInvalid'''
 
     if len(p) >= 6:
-        p[0] = (p[1],p[4])
+        p[0] = (p[1],p[4]) 
+    elif len(p) == 2:
+        print("Key doesn't have a value!!!")
+        p[0] = p[1]  
     else:
         p[0] = (p[1], p[3])
+
+def p_keyInvalid(p):
+    '''keyInvalid : key EQUAL NEWLINE'''
 
 def p_key(p):
     ''' key : bare_key
@@ -219,32 +226,34 @@ def p_error(p):
 def loadPairs(pairs, dic):
     if dic == None:
         for pair in pairs:
-            if pair[0] in tables.keys():
-                print(pair[0] + " already defined in current dictionary")
-                pass
-            else:
-                if is_dotted_key(pair[0]):
-                    nestedDicts(pair[0], tables, pair[1], 0)
-                elif isinline(pair[1]):
-                    pairsin = {}
-                    inlineAux(pair[1], pairsin)
-                    tables[pair[0]] = pairsin
+            if pair[0] != "KeyInvalid": # Caso em que a key não tem valor
+                if pair[0] in tables.keys():
+                    print(pair[0] + " already defined in current dictionary")
+                    pass
                 else:
-                    tables[pair[0]] = pair[1]
+                    if is_dotted_key(pair[0]):
+                        nestedDicts(pair[0], tables, pair[1], 0)
+                    elif isinline(pair[1]):
+                        pairsin = {}
+                        inlineAux(pair[1], pairsin)
+                        tables[pair[0]] = pairsin
+                    else:
+                        tables[pair[0]] = pair[1]
     else:
         for pair in pairs:
-            if pair[0] in dic.keys():
-                print(pair[0] + " already defined in current dictionary")
-                pass
-            else:
-                if is_dotted_key(pair[0]):
-                    nestedDicts(pair[0], dic, pair[1], 0)
-                elif isinline(pair[1]):
-                    pairsin = {}
-                    inlineAux(pair[1], pairsin)
-                    dic[pair[0]] = pairsin
+            if pair[0] != "KeyInvalid": 
+                if pair[0] in dic.keys():
+                    print(pair[0] + " already defined in current dictionary")
+                    pass
                 else:
-                    dic[pair[0]] = pair[1]
+                    if is_dotted_key(pair[0]):
+                        nestedDicts(pair[0], dic, pair[1], 0)
+                    elif isinline(pair[1]):
+                        pairsin = {}
+                        inlineAux(pair[1], pairsin)
+                        dic[pair[0]] = pairsin
+                    else:
+                        dic[pair[0]] = pair[1]
 
 def is_dotted_key(key):
     quotes = False
@@ -316,9 +325,12 @@ def nestedDicts(dottedKey, Rdict, last, array):
         nested_dict = nested_dict[nested_key]
 
     if keys[-1] in nested_dict and not array:
-        print(keys[-1] + " already defined in table")
+        print(keys[-1] + " already defined in table!")
     elif keys[-1] in nested_dict and array: # Quando se trata de uma key que ja possui um array neste dicionário, apenas damos append
-        nested_dict[keys[-1]].append(last)
+        if isinstance(nested_dict, list): # Caso em que surge uma tabela normal e de seguida um arrayTable com o mesmo nome
+            nested_dict[keys[-1]].append(last)
+        else:
+            print(keys[-1] + " already defined as a table!")
     elif array:
         nested_dict[keys[-1]] = []
         nested_dict[keys[-1]].append(last)
