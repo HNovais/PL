@@ -130,7 +130,7 @@ def p_pair(p):
         p[0] = (p[1],p[4]) 
     elif len(p) == 2:
         print("Key doesn't have a value!!!")
-        p[0] = p[1]  
+        p[0] = p[1]
     else:
         p[0] = (p[1], p[3])
 
@@ -329,7 +329,7 @@ def nestedDicts(dottedKey, Rdict, last, array):
     if keys[-1] in nested_dict and not array:
         print(keys[-1] + " already defined in table!")
     elif keys[-1] in nested_dict and array: # Quando se trata de uma key que ja possui um array neste dicionário, apenas realizamos o append
-        if isinstance(nested_dict, list): # Caso em que surge uma tabela normal e de seguida um arrayTable com o mesmo nome
+        if isinstance(nested_dict[keys[-1]], list): # Caso em que surge uma tabela normal e de seguida um arrayTable com o mesmo nome
             nested_dict[keys[-1]].append(last)
         else:
             print(keys[-1] + " already defined as a table!")
