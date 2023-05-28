@@ -300,7 +300,7 @@ def inlineAux(pair, pairsin):
 
 def isinline(elemento):
     if isinstance(elemento, list):  # Verifica se é uma lista
-        if all(isinstance(tupla, tuple) for tupla in elemento):  # Verifica se todos os elementos da lista são tuplas
+        if all(isinstance(tupla, tuple) for tupla in elemento):  # Verifica se todos os elementos da lista são tuplos
             return True
     return False
 
@@ -328,7 +328,7 @@ def nestedDicts(dottedKey, Rdict, last, array):
 
     if keys[-1] in nested_dict and not array:
         print(keys[-1] + " already defined in table!")
-    elif keys[-1] in nested_dict and array: # Quando se trata de uma key que ja possui um array neste dicionário, apenas damos append
+    elif keys[-1] in nested_dict and array: # Quando se trata de uma key que ja possui um array neste dicionário, apenas realizamos o append
         if isinstance(nested_dict, list): # Caso em que surge uma tabela normal e de seguida um arrayTable com o mesmo nome
             nested_dict[keys[-1]].append(last)
         else:
