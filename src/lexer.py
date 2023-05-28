@@ -115,16 +115,6 @@ t_ignore = ' \t'
 
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1) # Aqui talvez podéssemos dar skip à linha toda, uma vez que quando surge um carater invalido a linha toda fica invalida (ACHO EU!!)
+    t.lexer.skip(1) 
 
 lexer = lex.lex()
-
-with open('file.toml', 'r', encoding="utf-8") as file:
-    data = file.read()
-    lexer.input(data)
-
-    while True:
-        tok = lexer.token()
-        if not tok:
-            break
-        #print(tok)
