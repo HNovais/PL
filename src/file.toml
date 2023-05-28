@@ -2,6 +2,57 @@
 
 title = "fdsfa" 
 
+turco = {chines.ola.oee = 1, port = {x = 5, y = "fil"}, holanda = 3}
+
 [table]
 
-turco = {chines.ola.oee = 1, port.ole = {x = 5, y = "fil"}, holanda = 3}
+name = "toml"
+yey = 12
+telmo.olar = 11234
+int6 = 5_349_221
+hex2 = 0xdeadbeef
+oct1 = 0o01234567
+bin1 = 0b11010110
+flt3 = -0.01
+
+turco = {chines.ola.oee = 1, port = {x = 5, y = "fil"}, holanda = 3}
+
+[yws]
+coord.a.h = "x"
+
+[egrtjg]
+
+[[arrayT]]
+ola = "novo"
+ola1 = "nuevo"
+
+[[arrayT.fruit]]
+nova = 123
+
+[[arrayT]]
+hosp = "new"
+test = 159
+
+
+[[fruits]]
+name = "apple"
+
+[fruits.physical]  # subtable
+color = "red"
+shape = "round"
+
+[[fruits.varieties]]  # nested array of tables
+name = "red delicious"
+
+[[fruits]]
+name = "apple"
+
+[[fruits.varieties]]
+name = "granny smith"
+
+
+[[fruits]]
+name = "banana"
+
+[[fruits.varieties]]
+name = "plantain"
