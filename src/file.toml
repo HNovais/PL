@@ -1,18 +1,7 @@
-# INVALID TOML DOC
-[[fruits]]
-name = "apple"
+# This is a full-line comment
 
-[[fruits.varieties]]
-name = "red delicious"
+title = "fdsfa" 
 
-# INVALID: This table conflicts with the previous array of tables
-[fruits.varieties]
-name = "granny smith"
+[table]
 
-[fruits.physical]
-color = "red"
-shape = "round"
-
-# INVALID: This array of tables conflicts with the previous table
-[[fruits.physical]]
-color = "green"
+turco = { port.ole = {x = 5, y = "fil"}, holanda = 3}

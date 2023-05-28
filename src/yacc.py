@@ -337,21 +337,38 @@ def nestedDicts(dottedKey, Rdict, last, array):
         nested_dict[keys[-1]] = []
         nested_dict[keys[-1]].append(last)
     else:
-        nested_dict[keys[-1]] = last
+        if isinline(last):
+            pairSinInl = {}
+            nested_dict[keys[-1]] = inlineAux(last, pairSinInl)
+        else:    
+            nested_dict[keys[-1]] = last
 
 parser = yacc.yacc()
 
-
-with open("file.toml", encoding="utf-8") as f:
-    content = f.read()
+filename = input("Enter the file name: ")
 
 try:
-    result = parser.parse(content)
-    print("Parsing successful")
-except yacc.YaccError as e:
-    print("Syntax error encountered")
-    error_message = str(e)
-    print("Error message:", error_message)
+    with open(filename, encoding="utf-8") as f:
+        content = f.read()
+    print("File is being converted.")
 
-with open("output.json", "w") as f:
-    f.write(json.dumps(result, indent=2)) 
+    print("\n----PARSING----\n")
+
+    try:
+        result = parser.parse(content)
+        print("Parsing successful!\n")
+    except yacc.YaccError as e:
+        print("Syntax error encountered")
+        error_message = str(e)
+        print("Error message:", error_message)
+
+    outputFile = input("Enter the output file: ")
+
+    with open(outputFile, "w") as f:
+        f.write(json.dumps(result, indent=2)) 
+        print("Sucessfully created the file: " + outputFile)
+
+except FileNotFoundError:
+    print("File not found.")
+except IOError:
+    print("Error reading the file.")
