@@ -137,6 +137,8 @@ def p_pair(p):
 def p_keyInvalid(p):
     '''keyInvalid : key EQUAL NEWLINE'''
 
+    p[0] = ("KeyInvalid",-1) 
+
 def p_key(p):
     ''' key : bare_key
             | quoted_key
